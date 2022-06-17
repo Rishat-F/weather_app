@@ -4,7 +4,7 @@ import json
 import re
 from json.decoder import JSONDecodeError
 from subprocess import PIPE, Popen, TimeoutExpired
-from typing import List, NamedTuple, TypedDict
+from typing import List, NamedTuple
 
 import config
 from exceptions import CantGetGpsCoordinates, CommandRunsTooLong, NoSuchCommand
@@ -23,13 +23,6 @@ COMMAND_TIMEOUT = 5
 
 class Coordinates(NamedTuple):
     """GPS coordinates in tuple format."""
-
-    latitude: float
-    longitude: float
-
-
-class CoordinatesDict(TypedDict):
-    """GPS coordinates in dictionary format."""
 
     latitude: float
     longitude: float
@@ -75,12 +68,6 @@ def _parse_coordinates(command_output: bytes) -> Coordinates:
         output = command_output.decode().strip().lower()
     except UnicodeDecodeError as err:
         raise CantGetGpsCoordinates(f"Can't decode shell command output:\n{err}")
-    coords = _get_coords_dict(output)
-    return Coordinates(latitude=coords["latitude"], longitude=coords["longitude"])
-
-
-def _get_coords_dict(output: str) -> CoordinatesDict:
-    """Return a dict with 'latitude' and 'longitude' keys from shell command output."""
     dictionary_pattern = r"{.*}"
     try:
         dictionary = json.loads(
@@ -91,7 +78,7 @@ def _get_coords_dict(output: str) -> CoordinatesDict:
             f"Shell command output:\n'{output}'\nhas not dictionary inside"
         )
     try:
-        return CoordinatesDict(
+        return Coordinates(
             latitude=dictionary["latitude"], longitude=dictionary["longitude"]
         )
     except KeyError:
