@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "weather_app"
+version = "0.1.0"
+description = "Executable script 'weather' for getting weather data using GPS location"
+authors = ["Rishat Fayzullin <nilluziaf@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+flake8 = "^4.0.1"
+isort = "^5.10.1"
+mypy = "^0.961"
+pre-commit = "^2.19.0"
+pytest = "^7.1.2"
+vulture = "^2.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
