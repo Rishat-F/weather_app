@@ -73,7 +73,7 @@ jobs:
 
       - name: Lint with mypy
         run: |
-          poetry run mypy . --strict
+          poetry run mypy . --strict --ignore-missing-imports
 
 
       - name: Lint with isort
