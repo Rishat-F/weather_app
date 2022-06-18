@@ -11,3 +11,11 @@ class NoSuchCommand(Exception):
 
 class CommandRunsTooLong(Exception):
     """Command runs too long."""
+
+
+class CantGetWeather(Exception):
+    """Program can't get weather."""
+
+
+class ApiServiceError(Exception):
+    """Program can't parse weather from API service response."""
