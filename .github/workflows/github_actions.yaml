@@ -64,4 +64,4 @@ jobs:
         run: poetry run vulture
 
       - name: Test with pytest
-        run: poetry run pytest
+        run: poetry run OPEN_WEATHER_API_KEY=${{ secrets.OPEN_WEATHER_API_KEY }} pytest
