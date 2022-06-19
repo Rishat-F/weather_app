@@ -16,9 +16,6 @@ jobs:
   lint_and_test:
     runs-on: ubuntu-latest
     steps:
-      - name: Set OPEN_WEATHER_API_KEY environment variable
-        run: export OPEN_WEATHER_API_KEY=${{ secrets.OPEN_WEATHER_API_KEY }}
-
       - name: Check out repository code
         uses: actions/checkout@v3
 
