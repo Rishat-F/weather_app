@@ -18,6 +18,7 @@ from exceptions import (
     ApiServiceError,
     CantGetWeather,
     CommandRunsTooLong,
+    NoOpenWeatherApiKey,
     NoSuchCommand,
 )
 
@@ -79,19 +80,24 @@ class Weather(NamedTuple):
 
 def get_weather(coordinates: Coordinates) -> Weather:
     """Request weather in weather API service and return it."""
-    weather = _get_weather_by_command(
-        GetWeatherCommand(
-            executable="curl",
-            args=[
-                OPEN_WEATHER_API_URL_PATTERN.format(
-                    latitude=coordinates.latitude,
-                    longitude=coordinates.longitude,
-                    api_key=OPEN_WEATHER_API_KEY,
-                    language=OPEN_WEATHER_API_LANG.value,
-                )
-            ],
+    if not OPEN_WEATHER_API_KEY:
+        raise NoOpenWeatherApiKey(
+            "There is no OPEN_WEATHER_API_KEY in your environment."
         )
-    )
+    else:
+        weather = _get_weather_by_command(
+            GetWeatherCommand(
+                executable="curl",
+                args=[
+                    OPEN_WEATHER_API_URL_PATTERN.format(
+                        latitude=coordinates.latitude,
+                        longitude=coordinates.longitude,
+                        api_key=OPEN_WEATHER_API_KEY,
+                        language=OPEN_WEATHER_API_LANG.value,
+                    )
+                ],
+            )
+        )
     return weather
 
 

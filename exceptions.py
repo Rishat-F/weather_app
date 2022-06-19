@@ -19,3 +19,7 @@ class CantGetWeather(Exception):
 
 class ApiServiceError(Exception):
     """Program can't parse weather from API service response."""
+
+
+class NoOpenWeatherApiKey(Exception):
+    """There is no OPEN_WEATHER_API_KEY in environment."""
