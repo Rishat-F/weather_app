@@ -15,7 +15,6 @@ permissions:
 jobs:
   lint_and_test:
     runs-on: ubuntu-latest
-    environment: weather_app_environment
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
