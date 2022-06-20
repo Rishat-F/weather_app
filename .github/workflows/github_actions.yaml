@@ -55,7 +55,7 @@ jobs:
         run: poetry run black . --check ; poetry run black . --diff
 
       - name: Lint with mypy
-        run: poetry run mypy . --strict --ignore-missing-imports
+        run: poetry run mypy . --strict
 
       - name: Lint with isort
         run: poetry run isort . --diff
