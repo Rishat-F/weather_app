@@ -3,7 +3,7 @@
 import numbers
 from datetime import datetime
 
-import pytest
+import pytest  # type: ignore
 
 from coordinates import Coordinates, get_gps_coordinates
 from weather_api_service import Weather, WeatherType, get_weather
@@ -67,3 +67,24 @@ class TestGettingWeather:
         assert isinstance(self.weather.sunrise, datetime)
         assert isinstance(self.weather.sunset, datetime)
         assert isinstance(self.weather.city, str)
+
+
+@pytest.mark.xfail(reason="not realized yet")
+class TestFormattingWeather:
+    """Tests for weather_formatter.py module."""
+
+    def setup(self) -> None:
+        """Setup for all tests."""  # noqa
+        self.weather = Weather(
+            temperature=14,
+            weather_type=WeatherType.CLOUDS,
+            weather_description="Переменная облачность",
+            wind_speed=2.5,
+            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
+            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
+            city="Moscow",
+        )
+
+    def test_true(self) -> None:
+        """False test."""
+        assert False
