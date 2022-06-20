@@ -7,7 +7,7 @@ from typing import NamedTuple
 
 import config
 from exceptions import CantGetGpsCoordinates, CommandExecutionFailed
-from shell_commands import ShellCommand
+from shell_command import ShellCommand
 
 GET_GPS_COMMAND = ShellCommand(executable="whereami", arguments=["-f", "json"])
 
