@@ -3,7 +3,7 @@ Weather application
 This is a study project for getting weather by current GPS coordinates.
 
 The project aims to introduce with type hintings, poetry, CI (linters + tests),
-commits naming and workflow, environment variables and good architecture.
+commits naming and workflow, environment variables, OOP and good architecture.
 
 Based on next tutorials:
   - https://www.youtube.com/watch?v=dKxiHlZvULQ&t=4065s
