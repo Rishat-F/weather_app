@@ -5,7 +5,6 @@ import re
 from datetime import datetime
 from enum import Enum
 from json.decoder import JSONDecodeError
-from subprocess import PIPE, Popen, TimeoutExpired
 from typing import Dict, List, Literal, NamedTuple, TypedDict
 
 from config import (
@@ -17,10 +16,10 @@ from coordinates import Coordinates
 from exceptions import (
     ApiServiceError,
     CantGetWeather,
-    CommandRunsTooLong,
+    CommandExecutionFailed,
     NoOpenWeatherApiKey,
-    NoSuchCommand,
 )
+from shell_commands import ShellCommand
 
 Celsius = int
 Meters_per_second = float
@@ -34,16 +33,6 @@ class OpenWeatherDict(TypedDict):
     wind: Dict[Literal["speed"], float]
     sys: Dict[Literal["sunrise", "sunset"], int]
     name: str
-
-
-class GetWeatherCommand(NamedTuple):
-    """Shell command for getting weather by GPS coordinates."""
-
-    executable: str
-    args: List[str]
-
-
-COMMAND_TIMEOUT = 5
 
 
 class WeatherType(Enum):
@@ -86,9 +75,9 @@ def get_weather(coordinates: Coordinates) -> Weather:
         )
     else:
         weather = _get_weather_by_command(
-            GetWeatherCommand(
+            ShellCommand(
                 executable="curl",
-                args=[
+                arguments=[
                     OPEN_WEATHER_API_URL_PATTERN.format(
                         latitude=coordinates.latitude,
                         longitude=coordinates.longitude,
@@ -101,48 +90,34 @@ def get_weather(coordinates: Coordinates) -> Weather:
     return weather
 
 
-def _get_weather_by_command(command: GetWeatherCommand) -> Weather:
+def _get_weather_by_command(command: ShellCommand) -> Weather:
     """Return weather by shell command."""
-    command_output = _get_command_output(command)
+    try:
+        command_output, *_ = command.execute()
+    except CommandExecutionFailed as err:
+        raise CantGetWeather(
+            f"Can't get weather using {[command.executable, *command.arguments]} "
+            f"command.\n{err}"
+        )
+    except UnicodeDecodeError as err:
+        raise CantGetWeather(f"Can't decode shell command output:\n{err}")
     weather = _parse_weather(command_output)
     return weather
 
 
-def _get_command_output(command: GetWeatherCommand) -> bytes:
-    """Return output of a shell command."""
-    try:
-        process = Popen(args=[command.executable, *command.args], stdout=PIPE)
-    except FileNotFoundError:
-        raise NoSuchCommand(f"There's no command '{command.executable}' in your system")
-    try:
-        (output, err) = process.communicate(timeout=COMMAND_TIMEOUT)
-        exit_code = process.wait(timeout=COMMAND_TIMEOUT)
-    except TimeoutExpired as err:
-        process.kill()
-        raise CommandRunsTooLong(
-            f"Command '{err.cmd}' runs more than {err.timeout} seconds"
-        )
-    if err is not None or exit_code != 0:
-        raise CantGetWeather(
-            f"Can't get weather using {process.args} command"  # type: ignore
-        )
-    return output
-
-
-def _parse_weather(command_output: bytes) -> Weather:
+def _parse_weather(command_output: str) -> Weather:
     """Return weather from output of shell command."""
-    try:
-        output = command_output.decode().strip().lower()
-    except UnicodeDecodeError as err:
-        raise CantGetWeather(f"Can't decode shell command output:\n{err}")
-    dictionary_pattern = r"{.*}"
+    # Regex pattern for dictionary with weather data
+    weather_dictionary_pattern = r"{.*}"
     try:
         openweather_dict = json.loads(
-            re.search(dictionary_pattern, output).group()  # type: ignore
+            re.search(
+                weather_dictionary_pattern, command_output
+            ).group()  # type: ignore
         )
     except (AttributeError, JSONDecodeError):
         raise CantGetWeather(
-            f"Shell command output:\n'{output}'\nhas not dictionary inside"
+            f"Shell command output:\n'{command_output}'\nhas not dictionary inside"
         )
     return Weather(
         temperature=_parse_temperature(openweather_dict),
