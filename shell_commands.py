@@ -7,7 +7,12 @@ from subprocess import PIPE, Popen, TimeoutExpired
 from typing import List, NamedTuple
 
 from coordinates import Coordinates
-from exceptions import CantGetGpsCoordinates, CommandRunsTooLong, NoSuchCommand
+from exceptions import (
+    CantGetGpsCoordinates,
+    CommandExecutionFailed,
+    CommandRunsTooLong,
+    NoSuchCommand,
+)
 
 
 class CommandExecutionResult(NamedTuple):
@@ -48,6 +53,11 @@ class ShellCommand:
             process.kill
             raise CommandRunsTooLong(
                 f"Command '{err.cmd}' runs more than {err.timeout} seconds"
+            )
+        if stderr is not None or exit_code != 0:
+            raise CommandExecutionFailed(
+                f"Command has ended with exit_code: "
+                f"{exit_code} and stderr:\n{stderr}"  # type: ignore
             )
         return CommandExecutionResult(
             stdout_data=stdout, stderr_data=stderr, exit_code=exit_code

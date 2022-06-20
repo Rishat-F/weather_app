@@ -23,3 +23,7 @@ class ApiServiceError(Exception):
 
 class NoOpenWeatherApiKey(Exception):
     """There is no OPEN_WEATHER_API_KEY in environment."""
+
+
+class CommandExecutionFailed(Exception):
+    """Command execution ended with errors in stderr or exit_code != 0."""
