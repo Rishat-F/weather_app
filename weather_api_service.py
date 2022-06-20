@@ -19,7 +19,7 @@ from exceptions import (
     CommandExecutionFailed,
     NoOpenWeatherApiKey,
 )
-from shell_commands import ShellCommand
+from shell_command import ShellCommand
 
 Celsius = int
 Meters_per_second = float
