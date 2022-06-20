@@ -1,4 +1,4 @@
-"""Shell commands used by application."""
+"""Shell command used by application."""
 
 from subprocess import PIPE, Popen, TimeoutExpired
 from typing import List, NamedTuple
