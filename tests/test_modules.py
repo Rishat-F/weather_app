@@ -3,7 +3,7 @@
 import numbers
 from datetime import datetime
 
-import pytest  # type: ignore
+import pytest
 
 from coordinates import Coordinates, get_gps_coordinates
 from weather_api_service import Weather, WeatherType, get_weather
