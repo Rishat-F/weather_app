@@ -16,6 +16,22 @@ class OpenWeatherLanguage(Enum):
     RUSSIAN = "ru"
 
 
+class TemperatureUnit(Enum):
+    """Temperature measurement unit."""
+
+    CELSIUS = "°C"
+    KELVIN = "°K"
+    FAHRENHEIT = "°F"
+
+
+class SpeedUnit(Enum):
+    """Speed measurement unit."""
+
+    METERS_PER_SECOND = "m/s"
+    KILOMETERS_PER_HOUR = "km/h"
+    MILES_PER_HOUR = "mph"
+
+
 OPEN_WEATHER_API_KEY = os.getenv("OPEN_WEATHER_API_KEY", default=None)
 OPEN_WEATHER_API_LANG = OpenWeatherLanguage.RUSSIAN
 OPEN_WEATHER_API_URL_PATTERN = (
@@ -28,3 +44,5 @@ OPEN_WEATHER_API_URL_PATTERN = (
 )
 
 USE_ROUNDED_COORDS = True
+TEMPERATURE_UNIT = TemperatureUnit.CELSIUS
+SPEED_UNIT = SpeedUnit.METERS_PER_SECOND
