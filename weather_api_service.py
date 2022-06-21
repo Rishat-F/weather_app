@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from enum import Enum
 from json.decoder import JSONDecodeError
-from typing import Dict, List, Literal, NamedTuple, TypedDict
+from typing import Dict, List, Literal, NamedTuple, TypeAlias, TypedDict
 
 from config import (
     OPEN_WEATHER_API_KEY,
@@ -21,8 +21,12 @@ from exceptions import (
 )
 from shell_command import ShellCommand
 
-Celsius = int
-Meters_per_second = float
+Celsius: TypeAlias = int
+Kelvin: TypeAlias = int
+Fahrenheit: TypeAlias = int
+Meters_per_second: TypeAlias = float
+Miles_per_hour: TypeAlias = float
+Kilometers_per_hour: TypeAlias = float
 
 
 class OpenWeatherDict(TypedDict):
