@@ -16,7 +16,11 @@ repos:
     rev: v0.961
     hooks:
       - id: mypy
-        args: [--strict]
+        args: [
+          --strict,
+          --python-executable,
+            /home/hacker/Documents/projects/weather_app/.venv/bin/python,
+        ]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
