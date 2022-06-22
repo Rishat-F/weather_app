@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from enum import Enum
 from json.decoder import JSONDecodeError
-from typing import Dict, List, Literal, NamedTuple, TypeAlias, TypedDict
+from typing import Dict, List, Literal, NamedTuple, TypedDict
 
 from config import (
     OPEN_WEATHER_API_KEY,
@@ -21,7 +21,7 @@ from exceptions import (
 )
 from shell_command import ShellCommand
 
-Temperature: TypeAlias = int
+Temperature = int
 Celsius = Temperature
 Kelvin = Temperature
 Fahrenheit = Temperature
