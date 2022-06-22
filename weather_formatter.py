@@ -1,7 +1,7 @@
 """Preparing weather for printing in stdout."""
 
 import config
-from config import SpeedUnit, TemperatureUnit
+from config import WEATHER_DISPLAYING_PATTERN, SpeedUnit, TemperatureUnit
 from converters import (
     convert_to_fahrenheit,
     convert_to_kelvin,
@@ -21,13 +21,16 @@ from weather_api_service import (
 
 def format_weather(weather: Weather) -> str:
     """Format weather data in string."""
-    return (
-        f"{weather.city}, температура {weather.temperature}°C, "
-        f"{weather.weather_type.value}\n"
-        f"{weather.weather_description}\n"
-        f"Ветер: {weather.wind_speed}\n"
-        f"Восход: {weather.sunrise.strftime('%H:%M')}\n"
-        f"Закат: {weather.sunset.strftime('%H:%M')}\n"
+    return WEATHER_DISPLAYING_PATTERN.format(
+        city=weather.city.capitalize(),
+        temperature=_convert_temperature(weather.temperature),
+        temperature_unit=config.TEMPERATURE_UNIT.value,
+        weather_type=weather.weather_type.value,
+        weather_description=weather.weather_description,
+        wind_speed=_convert_speed(weather.wind_speed),
+        speed_unit=config.SPEED_UNIT.value,
+        sunrise=weather.sunrise.strftime("%H:%M"),
+        sunset=weather.sunset.strftime("%H:%M"),
     )
 
 
