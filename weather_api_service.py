@@ -21,12 +21,15 @@ from exceptions import (
 )
 from shell_command import ShellCommand
 
-Celsius: TypeAlias = int
-Kelvin: TypeAlias = int
-Fahrenheit: TypeAlias = int
-Meters_per_second: TypeAlias = float
-Miles_per_hour: TypeAlias = float
-Kilometers_per_hour: TypeAlias = float
+Temperature: TypeAlias = int
+Celsius = Temperature
+Kelvin = Temperature
+Fahrenheit = Temperature
+
+Speed = float
+Meters_per_second = Speed
+Miles_per_hour = Speed
+Kilometers_per_hour = Speed
 
 
 class OpenWeatherDict(TypedDict):
