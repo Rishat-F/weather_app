@@ -46,3 +46,11 @@ OPEN_WEATHER_API_URL_PATTERN = (
 USE_ROUNDED_COORDS = True
 TEMPERATURE_UNIT = TemperatureUnit.CELSIUS
 SPEED_UNIT = SpeedUnit.METERS_PER_SECOND
+
+WEATHER_DISPLAYING_PATTERN = (
+    "{city}, {temperature}{temperature_unit}, {weather_type}\n\n"
+    "{weather_description}\n"
+    "Ветер: {wind_speed}{speed_unit}\n"
+    "Восход: {sunrise}\n"
+    "Закат: {sunset}\n"
+)
