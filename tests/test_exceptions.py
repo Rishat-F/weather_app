@@ -7,6 +7,7 @@ from exceptions import (
     CantGetGpsCoordinates,
     CantGetWeather,
     CommandRunsTooLong,
+    NoOpenWeatherApiKey,
     NoSuchCommand,
 )
 
@@ -56,9 +57,17 @@ class TestWeatherApiServiceExceptions:
         """There is no command in system for getting weather by GPS coordinates."""
         assert isinstance(False, NoSuchCommand)
 
+    def test_no_open_weather_api_key(self) -> None:
+        """There is no OPEN_WEATHER_API_KEY variable in your environment."""
+        assert isinstance(False, NoOpenWeatherApiKey)
+
     def test_command_runs_too_long(self) -> None:
         """Command for getting weather by GPS coordinates runs too long."""
         assert isinstance(False, CommandRunsTooLong)
+
+    def test_wrong_open_weather_api_key(self) -> None:
+        """There is wrong OPEN_WEATHER_API_KEY variable in your environment."""
+        assert isinstance(False, CantGetWeather)
 
     def test_command_has_stderr(self) -> None:
         """Command for getting weather by GPS coordinates ends with err in stderr."""
