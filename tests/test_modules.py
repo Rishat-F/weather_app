@@ -128,3 +128,16 @@ class TestConverters:
         assert convert_to_mph(3.55) == 7.9
         assert convert_to_mph(6.442) == 14.4
         assert convert_to_mph(10.0) == 22.4
+
+
+@pytest.mark.xfail(reason="not realized yet")
+class TestConfigs:
+    """Tests for config.py module."""
+
+    def test_ru_language(self) -> None:
+        """Test Open Weather API service work with lang=ru config."""
+        assert False
+
+    def test_en_language(self) -> None:
+        """Test Open Weather API service work with lang=en config."""
+        assert False
