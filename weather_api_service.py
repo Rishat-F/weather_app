@@ -2,11 +2,10 @@
 
 import json
 import re
-from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from json.decoder import JSONDecodeError
-from typing import Dict, List, Literal, TypeAlias, TypedDict
+from typing import Dict, List, Literal, NamedTuple, TypeAlias, TypedDict
 
 from config import (
     OPEN_WEATHER_API_KEY,
@@ -60,8 +59,7 @@ class WeatherType(Enum):
     CLOUDS = "Облачно"
 
 
-@dataclass
-class Weather:
+class Weather(NamedTuple):
     """Data structure of weather."""
 
     temperature: Celsius

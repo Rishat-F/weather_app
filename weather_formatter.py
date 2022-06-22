@@ -21,14 +21,11 @@ from weather_api_service import (
 
 def format_weather(weather: Weather) -> str:
     """Format weather data in string."""
-    weather.temperature = _convert_temperature(weather.temperature)
-    weather.wind_speed = _convert_speed(weather.wind_speed)
     return (
-        f"{weather.city}, "
-        f"температура {weather.temperature}{config.TEMPERATURE_UNIT.value}, "
+        f"{weather.city}, температура {weather.temperature}°C, "
         f"{weather.weather_type.value}\n"
         f"{weather.weather_description}\n"
-        f"Ветер: {weather.wind_speed}{config.SPEED_UNIT.value}\n"
+        f"Ветер: {weather.wind_speed}\n"
         f"Восход: {weather.sunrise.strftime('%H:%M')}\n"
         f"Закат: {weather.sunset.strftime('%H:%M')}\n"
     )
