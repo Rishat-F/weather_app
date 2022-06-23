@@ -13,6 +13,7 @@ from converters import (
 )
 from coordinates import Coordinates, get_gps_coordinates
 from weather_api_service import Weather, WeatherType, get_weather
+from weather_formatter import format_weather
 
 
 @pytest.mark.xfail(reason="Getting current GPS coordinates dont work yet.")
@@ -141,3 +142,18 @@ class TestConfigs:
     def test_en_language(self) -> None:
         """Test Open Weather API service work with lang=en config."""
         assert False
+
+    def test_temperature_unit(self) -> None:
+        """Test weather displaying in/with configured temperature unit."""
+        weather = Weather(
+            temperature=15,
+            weather_type=WeatherType.CLOUDS,
+            weather_description="Переменная облачность",
+            wind_speed=2.5,
+            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
+            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
+            city="Moscow",
+        )
+        assert "15°C" in format_weather(weather)
+        assert "288°K" in format_weather(weather)
+        assert "59°F" in format_weather(weather)
