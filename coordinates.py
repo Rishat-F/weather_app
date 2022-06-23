@@ -5,7 +5,6 @@ import re
 from json.decoder import JSONDecodeError
 from typing import NamedTuple
 
-import config
 from exceptions import CantGetGpsCoordinates, CommandExecutionFailed
 from shell_command import ShellCommand
 
@@ -22,7 +21,7 @@ class Coordinates(NamedTuple):
 def get_gps_coordinates() -> Coordinates:
     """Return current GPS coordinates."""
     coordinates = _get_gps_coordinates_by_command(GET_GPS_COMMAND)
-    return _round_coordinates(coordinates, 2)
+    return coordinates
 
 
 def _get_gps_coordinates_by_command(command: ShellCommand) -> Coordinates:
@@ -58,18 +57,6 @@ def _parse_coordinates(get_gps_command_output: str) -> Coordinates:
         )
     return Coordinates(
         latitude=lat_lon_dict["latitude"], longitude=lat_lon_dict["longitude"]
-    )
-
-
-def _round_coordinates(coordinates: Coordinates, ndigit: int = 4) -> Coordinates:
-    """Round GPS coordinates to a given precision in decimal digits."""
-    if not config.USE_ROUNDED_COORDS:
-        return coordinates
-    return Coordinates(
-        *map(
-            lambda coord: round(coord, ndigit),
-            [coordinates.latitude, coordinates.longitude],
-        )
     )
 
 
