@@ -157,3 +157,18 @@ class TestConfigs:
         assert "15°C" in format_weather(weather)
         assert "288°K" in format_weather(weather)
         assert "59°F" in format_weather(weather)
+
+    def test_speed_unit(self) -> None:
+        """Test weather displaying in/with configured speed unit."""
+        weather = Weather(
+            temperature=15,
+            weather_type=WeatherType.CLOUDS,
+            weather_description="Переменная облачность",
+            wind_speed=2.5,
+            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
+            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
+            city="Moscow",
+        )
+        assert "2.5m/s" in format_weather(weather)
+        assert "9.0km/h" in format_weather(weather)
+        assert "5.5mph" in format_weather(weather)
