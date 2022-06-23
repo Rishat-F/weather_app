@@ -7,10 +7,10 @@ commits naming and workflow, environment variables, pattern matching, OOP and
 good architecture.
 
 Based on next tutorials:
-  - https://www.youtube.com/watch?v=dKxiHlZvULQ&t=4065s
-  - https://www.youtube.com/watch?v=KOC0Gbo_0HY
-  - https://www.youtube.com/watch?v=Y9MRCxq4DIc&t=653s
-  - https://www.youtube.com/watch?v=0kyy_zKO86U&t=1467s
+  - https://youtu.be/dKxiHlZvULQ (type hintings, good architecture)
+  - https://youtu.be/KOC0Gbo_0HY (poetry)
+  - https://youtu.be/Y9MRCxq4DIc (environment variables)
+  - https://youtu.be/0kyy_zKO86U?t=496 (pattern matching)
 
 Tutorials author is:
   https://www.youtube.com/c/Диджитализируй
