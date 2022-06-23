@@ -80,10 +80,10 @@ class TestGettingWeather:
 class TestFormattingWeather:
     """Tests for weather_formatter.py module."""
 
-    def setup(self) -> None:
-        """Setup for all tests."""  # noqa
-        self.weather = Weather(
-            temperature=14,
+    def test_false(self) -> None:
+        """False test."""
+        weather = Weather(
+            temperature=15,
             weather_type=WeatherType.CLOUDS,
             weather_description="Переменная облачность",
             wind_speed=2.5,
@@ -91,10 +91,7 @@ class TestFormattingWeather:
             sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
             city="Moscow",
         )
-
-    def test_true(self) -> None:
-        """False test."""
-        assert False
+        assert isinstance(weather, type(None))
 
 
 class TestConverters:
@@ -135,6 +132,18 @@ class TestConverters:
 class TestConfigs:
     """Tests for config.py module."""
 
+    def setup(self) -> None:
+        """Setup for all tests."""  # noqa
+        self.weather = Weather(
+            temperature=15,
+            weather_type=WeatherType.CLOUDS,
+            weather_description="Переменная облачность",
+            wind_speed=2.5,
+            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
+            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
+            city="Moscow",
+        )
+
     def test_ru_language(self) -> None:
         """Test Open Weather API service work with lang=ru config."""
         assert False
@@ -145,43 +154,16 @@ class TestConfigs:
 
     def test_temperature_unit(self) -> None:
         """Test weather displaying in/with configured temperature unit."""
-        weather = Weather(
-            temperature=15,
-            weather_type=WeatherType.CLOUDS,
-            weather_description="Переменная облачность",
-            wind_speed=2.5,
-            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
-            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-            city="Moscow",
-        )
-        assert "15°C" in format_weather(weather)
-        assert "288°K" in format_weather(weather)
-        assert "59°F" in format_weather(weather)
+        assert "15°C" in format_weather(self.weather)
+        assert "288°K" in format_weather(self.weather)
+        assert "59°F" in format_weather(self.weather)
 
     def test_speed_unit(self) -> None:
         """Test weather displaying in/with configured speed unit."""
-        weather = Weather(
-            temperature=15,
-            weather_type=WeatherType.CLOUDS,
-            weather_description="Переменная облачность",
-            wind_speed=2.5,
-            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
-            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-            city="Moscow",
-        )
-        assert "2.5m/s" in format_weather(weather)
-        assert "9.0km/h" in format_weather(weather)
-        assert "5.5mph" in format_weather(weather)
+        assert "2.5m/s" in format_weather(self.weather)
+        assert "9.0km/h" in format_weather(self.weather)
+        assert "5.5mph" in format_weather(self.weather)
 
     def test_different_weather_displayings(self) -> None:
         """Test different weather displaying patterns."""
-        weather = Weather(
-            temperature=15,
-            weather_type=WeatherType.CLOUDS,
-            weather_description="Переменная облачность",
-            wind_speed=2.5,
-            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
-            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-            city="Moscow",
-        )
-        assert isinstance(weather, type(None))
+        assert isinstance(self.weather, type(None))
