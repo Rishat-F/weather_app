@@ -12,7 +12,7 @@ from exceptions import (
 )
 
 
-@pytest.mark.xfail(reason="not realized yet")
+@pytest.mark.xfail(reason="test not realized yet", run=False)
 class TestCoordinatesModuleExceptions:
     """Test exceptions raising while getting current GPS coordinates."""
 
@@ -49,7 +49,7 @@ class TestCoordinatesModuleExceptions:
         assert isinstance(False, CantGetGpsCoordinates)
 
 
-@pytest.mark.xfail(reason="not realized yet")
+@pytest.mark.xfail(reason="test not realized yet", run=False)
 class TestWeatherApiServiceExceptions:
     """Test exceptions raising while getting weather by GPS coordinates."""
 

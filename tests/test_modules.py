@@ -76,7 +76,7 @@ class TestGettingWeather:
         assert isinstance(self.weather.city, str)
 
 
-@pytest.mark.xfail(reason="not realized yet")
+@pytest.mark.xfail(reason="test not realized yet", run=False)
 class TestFormattingWeather:
     """Tests for weather_formatter.py module."""
 
@@ -128,7 +128,7 @@ class TestConverters:
         assert convert_to_mph(10.0) == 22.4
 
 
-@pytest.mark.xfail(reason="not realized yet")
+@pytest.mark.xfail(reason="test not realized yet", run=False)
 class TestConfigs:
     """Tests for config.py module."""
 
