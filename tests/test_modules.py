@@ -76,11 +76,10 @@ class TestGettingWeather:
         assert isinstance(self.weather.city, str)
 
 
-@pytest.mark.xfail(reason="test not realized yet", run=False)
 class TestFormattingWeather:
     """Tests for weather_formatter.py module."""
 
-    def test_false(self) -> None:
+    def test_weather_formatter(self) -> None:
         """False test."""
         weather = Weather(
             temperature=15,
@@ -89,9 +88,14 @@ class TestFormattingWeather:
             wind_speed=2.5,
             sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
             sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-            city="Moscow",
+            city="moscow",
         )
-        assert isinstance(weather, type(None))
+        expected_displaying_weather = (
+            "Moscow, 15°C, Облачно\n\nПеременная облачность\n"
+            "Ветер: 2.5m/s\nВосход: 04:00\nЗакат: 20:25\n"
+        )
+        actual_displaying_weather = format_weather(weather)
+        assert expected_displaying_weather == actual_displaying_weather
 
 
 class TestConverters:
