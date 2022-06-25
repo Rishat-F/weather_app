@@ -7,11 +7,8 @@ from enum import Enum
 from json.decoder import JSONDecodeError
 from typing import Dict, List, Literal, NamedTuple, TypedDict
 
-from config import (
-    OPEN_WEATHER_API_KEY,
-    OPEN_WEATHER_API_LANG,
-    OPEN_WEATHER_API_URL_PATTERN,
-)
+import config
+import shell_command
 from coordinates import Coordinates
 from exceptions import (
     ApiServiceError,
@@ -19,7 +16,6 @@ from exceptions import (
     CommandExecutionFailed,
     NoOpenWeatherApiKey,
 )
-from shell_command import ShellCommand
 
 Temperature = int
 Celsius = Temperature
@@ -76,20 +72,20 @@ class Weather(NamedTuple):
 
 def get_weather(coordinates: Coordinates) -> Weather:
     """Request weather in weather API service and return it."""
-    if not OPEN_WEATHER_API_KEY:
+    if not config.OPEN_WEATHER_API_KEY:
         raise NoOpenWeatherApiKey(
             "There is no OPEN_WEATHER_API_KEY in your environment."
         )
     else:
         weather = _get_weather_by_command(
-            ShellCommand(
+            shell_command.ShellCommand(
                 executable="curl",
                 arguments=[
-                    OPEN_WEATHER_API_URL_PATTERN.format(
+                    config.OPEN_WEATHER_API_URL_PATTERN.format(
                         latitude=coordinates.latitude,
                         longitude=coordinates.longitude,
-                        api_key=OPEN_WEATHER_API_KEY,
-                        language=OPEN_WEATHER_API_LANG.value,
+                        api_key=config.OPEN_WEATHER_API_KEY,
+                        language=config.OPEN_WEATHER_API_LANG.value,
                     )
                 ],
             )
@@ -97,7 +93,7 @@ def get_weather(coordinates: Coordinates) -> Weather:
     return weather
 
 
-def _get_weather_by_command(command: ShellCommand) -> Weather:
+def _get_weather_by_command(command: shell_command.ShellCommand) -> Weather:
     """Return weather by shell command."""
     try:
         command_output, *_ = command.execute()
