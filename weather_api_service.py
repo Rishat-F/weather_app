@@ -120,7 +120,7 @@ def _parse_weather(command_output: str) -> Weather:
         )
     except (AttributeError, JSONDecodeError):
         raise CantGetWeather(
-            f"Shell command output:\n'{command_output}'\nhas not dictionary inside"
+            f"Shell command output:\n'{command_output}'\nhas no dictionary inside"
         )
     return Weather(
         temperature=_parse_temperature(openweather_dict),
