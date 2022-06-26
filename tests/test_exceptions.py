@@ -246,9 +246,9 @@ class TestWeatherApiServiceExceptions:
         [
             "Output without dictionary",
             "Output without dictionary: {broken dictionary]",
-            "Output without dictionary: {'also': 'broken', dictionary, 'a': '1'}",
-            "Output without dictionary: {'broken': 'dictionary', 'too': ''}}",
-            "{'also': 'broken', dictionary, 'a': '1'}",
+            'Output without dictionary: {"also": "broken", dictionary, "a": "1"}',
+            'Output without dictionary: {"broken": "dictionary", "too": ""}}',
+            '{"also": "broken", dictionary, "a": "1"}',
         ],
     )
     def test_command_output_has_incorrect_dictionary(
