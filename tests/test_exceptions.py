@@ -8,7 +8,7 @@ from pytest import MonkeyPatch
 
 import config
 import shell_command
-from coordinates import Coordinates
+from coordinates import Coordinates, get_gps_coordinates
 from exceptions import (
     ApiServiceError,
     CantGetGpsCoordinates,
@@ -23,41 +23,135 @@ from weather_api_service import get_weather
 Undecodable_bytes = bytes
 
 
-@pytest.mark.xfail(reason="test not realized yet", run=False)
 class TestCoordinatesModuleExceptions:
     """Test exceptions raising while getting current GPS coordinates."""
 
-    def test_no_such_command(self) -> None:
+    def test_no_such_command(self, monkeypatch: MonkeyPatch) -> None:
         """If there is no command in system for getting current GPS coordinates."""
-        assert isinstance(False, NoSuchCommand)
 
-    def test_command_runs_too_long(self) -> None:
+        class MonkeyPatchShellCommand(ShellCommand):
+            """Mock for ShellCommand.__init__ method."""
+
+            def __init__(self, *args: Any, **kwargs: Any):
+                _, _ = args, kwargs
+                self.executable = "qwerty"
+                self.arguments = []
+                self.timeout = 1
+
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", MonkeyPatchShellCommand())
+        with pytest.raises(NoSuchCommand):
+            get_gps_coordinates()
+
+    def test_command_runs_too_long(self, monkeypatch: MonkeyPatch) -> None:
         """If command for getting current GPS coordinates runs too long."""
-        assert isinstance(False, CommandRunsTooLong)
 
-    def test_command_has_stderr(self) -> None:
+        class MonkeyPatchShellCommand(ShellCommand):
+            """Mock for ShellCommand.__init__ method."""
+
+            def __init__(self, *args: Any, **kwargs: Any):
+                _, _ = args, kwargs
+                self.executable = "ping"
+                self.arguments = ["google.com"]
+                self.timeout = 0.5
+
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", MonkeyPatchShellCommand())
+        with pytest.raises(CommandRunsTooLong):
+            get_gps_coordinates()
+
+    def test_command_has_stderr(self, monkeypatch: MonkeyPatch) -> None:
         """If command for getting current GPS coordinates ends with err in stderr."""
-        assert isinstance(False, CantGetGpsCoordinates)
 
-    def test_command_has_wrong_exit_code(self) -> None:
+        def monkeypatch_communicate(*args: Any, **kwargs: Any) -> tuple[Any, bytes]:
+            """Mock for Popen.communicate method."""
+            _, _ = args, kwargs
+            return (None, b"error")
+
+        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate)
+        with pytest.raises(CantGetGpsCoordinates):
+            get_gps_coordinates()
+
+    def test_command_has_wrong_exit_code(self, monkeypatch: MonkeyPatch) -> None:
         """If command for getting current GPS coordinates returns code != 0."""
-        assert isinstance(False, CantGetGpsCoordinates)
 
-    def test_undecodable_command_output(self) -> None:
+        def monkeypatch_wait(*args: Any, **kwargs: Any) -> int:
+            """Mock for Popen.wait method."""
+            _, _ = args, kwargs
+            return 1
+
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait)
+        with pytest.raises(CantGetGpsCoordinates):
+            get_gps_coordinates()
+
+    def test_undecodable_command_output(self, monkeypatch: MonkeyPatch) -> None:
         """If command stdout is undecodable."""
-        assert isinstance(False, CantGetGpsCoordinates)
+        undecodable_bytes = b"\x80\x02\x03"
 
-    def test_command_output_has_no_lat_lon_dictionary(self) -> None:
+        def monkeypatch_communicate(
+            *args: Any, **kwargs: Any
+        ) -> tuple[Undecodable_bytes, Any]:
+            """Mock for Popen.communicate method."""
+            _, _ = args, kwargs
+            return (undecodable_bytes, None)
+
+        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate)
+        with pytest.raises(CantGetGpsCoordinates):
+            get_gps_coordinates()
+
+    @pytest.mark.xfail(reason="right regex in _parse_coordinates not realized yet")
+    @pytest.mark.parametrize(
+        "command_output",
+        [
+            '{"latitude": 50}',
+            '{"longitude": 50}',
+            '{"latitude": 50, "longitud": 50}',
+            '{"latitud": 50, "longitude": 50}',
+            '{"latitud": 50, "longitud": 50}',
+            'Invalid dictionary: {"invalid": "dictionary"}',
+            "{}",
+        ],
+    )
+    def test_command_output_has_no_lat_lon_dictionary(
+        self, command_output: str, monkeypatch: MonkeyPatch
+    ) -> None:
         """If command stdout has no dictionary with latitude and longitude."""
-        assert isinstance(False, CantGetGpsCoordinates)
 
-    def test_command_output_has_incorrect_dictionary(self) -> None:
+        def monkeypatch_execute(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
+            """Mock for ShellCommand.execute method."""
+            _, _ = args, kwargs
+            return (command_output, None, None)
+
+        monkeypatch.setattr(ShellCommand, "execute", monkeypatch_execute)
+        with pytest.raises(CantGetGpsCoordinates):
+            get_gps_coordinates()
+
+    @pytest.mark.parametrize(
+        "command_output",
+        [
+            '{"latitude": 50, "longitude": 50, qwerty}',
+            '{qwerty "latitude": 50, "longitude": 50}',
+            '{"latitude": 50, qwerty, "longitude": 50}',
+            '{qwerty "latitude": 50, "longitude": 50 qwerty}',
+            '{"latitude": lat, "longitude": 50}',
+            '{"latitude": 50, "longitude": lon}',
+        ],
+    )
+    def test_command_output_has_incorrect_dictionary(
+        self, command_output: str, monkeypatch: MonkeyPatch
+    ) -> None:
         """
         If dictionary with latitude and longitude is incorrect for json.loads().
 
         Example: '{'latitude': 50.55, 'longitude': 50.55, qwerty}'.
         """
-        assert isinstance(False, CantGetGpsCoordinates)
+
+        def monkeypatch_execute(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
+            """Mock for ShellCommand.execute method."""
+            _, _ = args, kwargs
+            return (command_output, None, None)
+
+        monkeypatch.setattr(ShellCommand, "execute", monkeypatch_execute)
+        with pytest.raises(CantGetGpsCoordinates):
+            get_gps_coordinates()
 
 
 class TestWeatherApiServiceExceptions:
