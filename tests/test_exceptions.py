@@ -1,7 +1,7 @@
 """Tests for application exceptions."""
 
 from subprocess import Popen
-from typing import Any
+from typing import Any, Callable, Type
 
 import pytest
 from pytest import MonkeyPatch
@@ -23,107 +23,168 @@ from weather_api_service import get_weather
 Undecodable_bytes = bytes
 
 
+@pytest.fixture
+def not_existing_command() -> Type[ShellCommand]:
+    """Fixture for not existing shell command."""
+
+    class MonkeyPatchShellCommand(ShellCommand):
+        """Mock for ShellCommand.__init__ method."""
+
+        def __init__(self, *args: Any, **kwargs: Any):
+            _, _ = args, kwargs
+            self.executable = "qwerty"
+            self.arguments = []
+            self.timeout = 1
+
+    return MonkeyPatchShellCommand
+
+
+@pytest.fixture
+def long_running_command() -> Type[ShellCommand]:
+    """Fixture for long running shell command."""
+
+    class MonkeyPatchShellCommand(ShellCommand):
+        """Mock for ShellCommand.__init__ method."""
+
+        def __init__(self, *args: Any, **kwargs: Any):
+            _, _ = args, kwargs
+            self.executable = "ping"
+            self.arguments = ["localhost"]
+            self.timeout = 0.5
+
+    return MonkeyPatchShellCommand
+
+
+@pytest.fixture
+def usual_command() -> Type[ShellCommand]:
+    """Fixture for usual shell command."""
+
+    class MonkeyPatchShellCommand(ShellCommand):
+        """Mock for ShellCommand.__init__ method."""
+
+        def __init__(self, *args: Any, **kwargs: Any):
+            _, _ = args, kwargs
+            self.executable = "echo"
+            self.arguments = []
+            self.timeout = 0.5
+
+    return MonkeyPatchShellCommand
+
+
+@pytest.fixture
+def monkeypatch_communicate_with_stderr() -> Callable[[Any, Any], tuple[Any, bytes]]:
+    """Mock for Popen.communicate method that returns stderr."""
+
+    def inner(*args: Any, **kwargs: Any) -> tuple[Any, bytes]:
+        _, _ = args, kwargs
+        return (None, b"error")
+
+    return inner
+
+
+@pytest.fixture
+def monkeypatch_communicate_with_undecodable_output() -> Callable[
+    [Any, Any], tuple[Undecodable_bytes, Any]
+]:
+    """Mock for Popen.communicate method."""
+
+    def inner(*args: Any, **kwargs: Any) -> tuple[Undecodable_bytes, Any]:
+        _, _ = args, kwargs
+        undecodable_bytes = b"\x80\x02\x03"
+        return (undecodable_bytes, None)
+
+    return inner
+
+
+@pytest.fixture
+def monkeypatch_wait() -> Callable[[Any, Any], int]:
+    """Mock for Popen.wait method that returns exit code != 0."""
+
+    def inner(*args: Any, **kwargs: Any) -> int:
+        _, _ = args, kwargs
+        return 1
+
+    return inner
+
+
+@pytest.fixture
+def monkeypatch_execute() -> Callable[
+    [str], Callable[[Any, Any], tuple[str, Any, Any]]
+]:
+    """Mock for ShellCommand.execute method."""
+
+    def inner(command_output: str) -> Callable[[Any, Any], tuple[str, Any, Any]]:
+        def inner_in_inner(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
+            _, _ = args, kwargs
+            return (command_output, None, None)
+
+        return inner_in_inner
+
+    return inner
+
+
 class TestCoordinatesModuleExceptions:
     """Test exceptions raising while getting current GPS coordinates."""
 
-    def test_no_such_command(self, monkeypatch: MonkeyPatch) -> None:
+    def test_no_such_command(
+        self,
+        monkeypatch: MonkeyPatch,
+        not_existing_command: Callable[[], Type[ShellCommand]],
+    ) -> None:
         """If there is no command in system for getting current GPS coordinates."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "qwerty"
-                self.arguments = []
-                self.timeout = 1
-
-        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", MonkeyPatchShellCommand())
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", not_existing_command())
         with pytest.raises(NoSuchCommand):
             get_gps_coordinates()
 
-    def test_command_runs_too_long(self, monkeypatch: MonkeyPatch) -> None:
+    def test_command_runs_too_long(
+        self,
+        monkeypatch: MonkeyPatch,
+        long_running_command: Callable[[], Type[ShellCommand]],
+    ) -> None:
         """If command for getting current GPS coordinates runs too long."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "ping"
-                self.arguments = ["localhost"]
-                self.timeout = 0.5
-
-        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", MonkeyPatchShellCommand())
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", long_running_command())
         with pytest.raises(CommandRunsTooLong):
             get_gps_coordinates()
 
-    def test_command_has_stderr(self, monkeypatch: MonkeyPatch) -> None:
+    def test_command_has_stderr(
+        self,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_communicate_with_stderr: Callable[
+            [], Callable[[Any, Any], tuple[Any, bytes]]
+        ],
+    ) -> None:
         """If command for getting current GPS coordinates ends with err in stderr."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "echo"
-                self.arguments = []
-                self.timeout = 0.5
-
-        def monkeypatch_communicate(*args: Any, **kwargs: Any) -> tuple[Any, bytes]:
-            """Mock for Popen.communicate method."""
-            _, _ = args, kwargs
-            return (None, b"error")
-
-        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", MonkeyPatchShellCommand())
-        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate)
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
+        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate_with_stderr)
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
-    def test_command_has_wrong_exit_code(self, monkeypatch: MonkeyPatch) -> None:
+    def test_command_has_wrong_exit_code(
+        self,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_wait: Callable[[], Callable[[Any, Any], int]],
+    ) -> None:
         """If command for getting current GPS coordinates returns code != 0."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "echo"
-                self.arguments = []
-                self.timeout = 0.5
-
-        def monkeypatch_wait(*args: Any, **kwargs: Any) -> int:
-            """Mock for Popen.wait method."""
-            _, _ = args, kwargs
-            return 1
-
-        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", MonkeyPatchShellCommand())
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
         monkeypatch.setattr(Popen, "wait", monkeypatch_wait)
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
-    def test_undecodable_command_output(self, monkeypatch: MonkeyPatch) -> None:
+    def test_undecodable_command_output(
+        self,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_communicate_with_undecodable_output: Callable[
+            [Any, Any], tuple[Undecodable_bytes, Any]
+        ],
+    ) -> None:
         """If command stdout is undecodable."""
-        undecodable_bytes = b"\x80\x02\x03"
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "echo"
-                self.arguments = []
-                self.timeout = 0.5
-
-        def monkeypatch_communicate(
-            *args: Any, **kwargs: Any
-        ) -> tuple[Undecodable_bytes, Any]:
-            """Mock for Popen.communicate method."""
-            _, _ = args, kwargs
-            return (undecodable_bytes, None)
-
-        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", MonkeyPatchShellCommand())
-        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate)
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
+        monkeypatch.setattr(
+            Popen, "communicate", monkeypatch_communicate_with_undecodable_output
+        )
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
@@ -141,16 +202,19 @@ class TestCoordinatesModuleExceptions:
         ],
     )
     def test_command_output_has_no_lat_lon_dictionary(
-        self, command_output: str, monkeypatch: MonkeyPatch
+        self,
+        command_output: str,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_execute: Callable[
+            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+        ],
     ) -> None:
         """If command stdout has no dictionary with latitude and longitude."""
-
-        def monkeypatch_execute(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
-            """Mock for ShellCommand.execute method."""
-            _, _ = args, kwargs
-            return (command_output, None, None)
-
-        monkeypatch.setattr(ShellCommand, "execute", monkeypatch_execute)
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
+        monkeypatch.setattr(
+            ShellCommand, "execute", monkeypatch_execute(command_output)
+        )
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
@@ -166,20 +230,23 @@ class TestCoordinatesModuleExceptions:
         ],
     )
     def test_command_output_has_incorrect_dictionary(
-        self, command_output: str, monkeypatch: MonkeyPatch
+        self,
+        command_output: str,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_execute: Callable[
+            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+        ],
     ) -> None:
         """
         If dictionary with latitude and longitude is incorrect for json.loads().
 
         Example: '{'latitude': 50.55, 'longitude': 50.55, qwerty}'.
         """
-
-        def monkeypatch_execute(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
-            """Mock for ShellCommand.execute method."""
-            _, _ = args, kwargs
-            return (command_output, None, None)
-
-        monkeypatch.setattr(ShellCommand, "execute", monkeypatch_execute)
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
+        monkeypatch.setattr(
+            ShellCommand, "execute", monkeypatch_execute(command_output)
+        )
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
@@ -189,19 +256,13 @@ class TestWeatherApiServiceExceptions:
 
     coordinates = Coordinates(latitude=50, longitude=50)
 
-    def test_no_such_command(self, monkeypatch: MonkeyPatch) -> None:
+    def test_no_such_command(
+        self,
+        monkeypatch: MonkeyPatch,
+        not_existing_command: Callable[[], Type[ShellCommand]],
+    ) -> None:
         """If there is no command in system for getting weather by GPS coordinates."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "qwerty"
-                self.arguments = []
-                self.timeout = 1
-
-        monkeypatch.setattr(shell_command, "ShellCommand", MonkeyPatchShellCommand)
+        monkeypatch.setattr(shell_command, "ShellCommand", not_existing_command)
         with pytest.raises(NoSuchCommand):
             get_weather(self.coordinates)
 
@@ -211,18 +272,13 @@ class TestWeatherApiServiceExceptions:
         with pytest.raises(NoOpenWeatherApiKey):
             get_weather(self.coordinates)
 
-    def test_command_runs_too_long(self, monkeypatch: MonkeyPatch) -> None:
+    def test_command_runs_too_long(
+        self,
+        monkeypatch: MonkeyPatch,
+        long_running_command: Callable[[], Type[ShellCommand]],
+    ) -> None:
         """If command for getting weather by GPS coordinates runs too long."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, **_: Any):
-                self.executable = "ping"
-                self.arguments = ["localhost"]
-                self.timeout = 0.5
-
-        monkeypatch.setattr(shell_command, "ShellCommand", MonkeyPatchShellCommand)
+        monkeypatch.setattr(shell_command, "ShellCommand", long_running_command)
         with pytest.raises(CommandRunsTooLong):
             get_weather(self.coordinates)
 
@@ -232,72 +288,45 @@ class TestWeatherApiServiceExceptions:
         with pytest.raises(ApiServiceError):
             get_weather(self.coordinates)
 
-    def test_command_has_stderr(self, monkeypatch: MonkeyPatch) -> None:
+    def test_command_has_stderr(
+        self,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_communicate_with_stderr: Callable[
+            [], Callable[[Any, Any], tuple[Any, bytes]]
+        ],
+    ) -> None:
         """If command for getting weather by GPS coordinates ends with err in stderr."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "echo"
-                self.arguments = []
-                self.timeout = 0.5
-
-        def monkeypatch_communicate(*args: Any, **kwargs: Any) -> tuple[Any, bytes]:
-            """Mock for Popen.communicate method."""
-            _, _ = args, kwargs
-            return (None, b"error")
-
-        monkeypatch.setattr(shell_command, "ShellCommand", MonkeyPatchShellCommand)
-        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate)
+        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate_with_stderr)
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
 
-    def test_command_has_wrong_exit_code(self, monkeypatch: MonkeyPatch) -> None:
+    def test_command_has_wrong_exit_code(
+        self,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_wait: Callable[[], Callable[[Any, Any], int]],
+    ) -> None:
         """If command for getting weather by GPS coordinates returns code != 0."""
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "echo"
-                self.arguments = []
-                self.timeout = 0.5
-
-        def monkeypatch_wait(*args: Any, **kwargs: Any) -> int:
-            """Mock for Popen.wait method."""
-            _, _ = args, kwargs
-            return 1
-
-        monkeypatch.setattr(shell_command, "ShellCommand", MonkeyPatchShellCommand)
+        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
         monkeypatch.setattr(Popen, "wait", monkeypatch_wait)
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
 
-    def test_undecodable_command_output(self, monkeypatch: MonkeyPatch) -> None:
+    def test_undecodable_command_output(
+        self,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_communicate_with_undecodable_output: Callable[
+            [Any, Any], tuple[Undecodable_bytes, Any]
+        ],
+    ) -> None:
         """If command stdout is undecodable."""
-        undecodable_bytes = b"\x80\x02\x03"
-
-        class MonkeyPatchShellCommand(ShellCommand):
-            """Mock for ShellCommand.__init__ method."""
-
-            def __init__(self, *args: Any, **kwargs: Any):
-                _, _ = args, kwargs
-                self.executable = "echo"
-                self.arguments = []
-                self.timeout = 0.5
-
-        def monkeypatch_communicate(
-            *args: Any, **kwargs: Any
-        ) -> tuple[Undecodable_bytes, Any]:
-            """Mock for Popen.communicate method."""
-            _, _ = args, kwargs
-            return (undecodable_bytes, None)
-
-        monkeypatch.setattr(shell_command, "ShellCommand", MonkeyPatchShellCommand)
-        monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate)
+        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr(
+            Popen, "communicate", monkeypatch_communicate_with_undecodable_output
+        )
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
 
@@ -312,16 +341,19 @@ class TestWeatherApiServiceExceptions:
         ],
     )
     def test_command_output_has_incorrect_dictionary(
-        self, command_output: str, monkeypatch: MonkeyPatch
+        self,
+        command_output: str,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_execute: Callable[
+            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+        ],
     ) -> None:
         """If command stdout has no dictionary inside."""
-
-        def monkeypatch_execute(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
-            """Mock for ShellCommand.execute method."""
-            _, _ = args, kwargs
-            return (command_output, None, None)
-
-        monkeypatch.setattr(ShellCommand, "execute", monkeypatch_execute)
+        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr(
+            ShellCommand, "execute", monkeypatch_execute(command_output)
+        )
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
 
@@ -354,15 +386,18 @@ class TestWeatherApiServiceExceptions:
         ],
     )
     def test_command_output_has_invalid_dictionary(
-        self, command_output: str, monkeypatch: MonkeyPatch
+        self,
+        command_output: str,
+        monkeypatch: MonkeyPatch,
+        usual_command: Callable[[], Type[ShellCommand]],
+        monkeypatch_execute: Callable[
+            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+        ],
     ) -> None:
         """If command stdout has dictionary without needed weather data."""
-
-        def monkeypatch_execute(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
-            """Mock for ShellCommand.execute method."""
-            _, _ = args, kwargs
-            return (command_output, None, None)
-
-        monkeypatch.setattr(ShellCommand, "execute", monkeypatch_execute)
+        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr(
+            ShellCommand, "execute", monkeypatch_execute(command_output)
+        )
         with pytest.raises(ApiServiceError):
             get_weather(self.coordinates)
