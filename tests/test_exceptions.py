@@ -360,27 +360,27 @@ class TestWeatherApiServiceExceptions:
     @pytest.mark.parametrize(
         "command_output",
         [
-            '{"weather":[{"id":800,"description":"ясно"}],"main":{}, \
-                "wind":{"speed":3},"sys":{"sunrise":1656115279, \
-                "sunset":1656178205},"name":"малые кабаны"}',
-            '{"weather":[{"description":"ясно"}],"main":{"temp":20.29}, \
-                "wind":{"speed":3},"sys":{"sunrise":1656115279, \
-                "sunset":1656178205},"name":"малые кабаны"}',
-            '{"weather":[{"id":800}],"main":{"temp":20.29}, \
-                "wind":{"speed":3},"sys":{"sunrise":1656115279, \
-                "sunset":1656178205},"name":"малые кабаны"}',
-            '{"weather":[{"id":800,"description":"ясно"}], \
-                "main":{"temp":20.29},"wind":{},"sys":{"sunrise":1656115279, \
-                "sunset":1656178205},"name":"малые кабаны"}',
-            '{"weather":[{"id":800,"description":"ясно"}], \
-                "main":{"temp":20.29},"wind":{"speed":3}, \
-                "sys":{"sunset":1656178205},"name":"малые кабаны"}',
-            '{"weather":[{"id":800,"description":"ясно"}], \
-                "main":{"temp":20.29},"wind":{"speed":3}, \
-                "sys":{"sunrise":1656115279},"name":"малые кабаны"}',
-            '{"weather":[{"id":800,"description":"ясно"}], \
-                "main":{"temp":20.29},"wind":{"speed":3}, \
-                "sys":{"sunrise":1656115279,"sunset":1656178205}}',
+            '{"weather":[{"id":800,"description":"ясно"}],"main":{}, '
+            '"wind":{"speed":3},"sys":{"sunrise":1656115279, '
+            '"sunset":1656178205},"name":"малые кабаны"}',
+            '{"weather":[{"description":"ясно"}],"main":{"temp":20.29}, '
+            '"wind":{"speed":3},"sys":{"sunrise":1656115279, '
+            '"sunset":1656178205},"name":"малые кабаны"}',
+            '{"weather":[{"id":800}],"main":{"temp":20.29}, '
+            '"wind":{"speed":3},"sys":{"sunrise":1656115279, '
+            '"sunset":1656178205},"name":"малые кабаны"}',
+            '{"weather":[{"id":800,"description":"ясно"}], '
+            '"main":{"temp":20.29},"wind":{},"sys":{"sunrise":1656115279, '
+            '"sunset":1656178205},"name":"малые кабаны"}',
+            '{"weather":[{"id":800,"description":"ясно"}], '
+            '"main":{"temp":20.29},"wind":{"speed":3}, '
+            '"sys":{"sunset":1656178205},"name":"малые кабаны"}',
+            '{"weather":[{"id":800,"description":"ясно"}], '
+            '"main":{"temp":20.29},"wind":{"speed":3}, '
+            '"sys":{"sunrise":1656115279},"name":"малые кабаны"}',
+            '{"weather":[{"id":800,"description":"ясно"}], '
+            '"main":{"temp":20.29},"wind":{"speed":3}, '
+            '"sys":{"sunrise":1656115279,"sunset":1656178205}}',
             'Invalid dictionary: {"invalid": "dictionary"}',
             "{}",
         ],
