@@ -19,7 +19,7 @@ repos:
         args: [
           --strict,
           --python-executable,
-            /home/hacker/Documents/projects/weather_app/.venv/bin/python,
+            $(which python),
         ]
 
   - repo: https://github.com/pycqa/isort
