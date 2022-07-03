@@ -22,6 +22,8 @@ from shell_command import ShellCommand
 from weather_api_service import get_weather
 
 Undecodable_bytes = bytes
+Exit_code = int
+NO_INTERNET_EXIT_CODE = 100
 
 
 @pytest.fixture
@@ -74,6 +76,23 @@ def usual_command() -> Type[ShellCommand]:
 
 
 @pytest.fixture
+def command_that_use_internet() -> Type[ShellCommand]:
+    """Fixture for shell command that use internet."""
+
+    class MonkeyPatchShellCommand(ShellCommand):
+        """Mock for ShellCommand.__init__ method."""
+
+        def __init__(self, *args: Any, **kwargs: Any):
+            _, _ = args, kwargs
+            self.executable = "echo"
+            self.arguments = []
+            self.timeout = 0.5
+            self.no_internet_exit_code = NO_INTERNET_EXIT_CODE
+
+    return MonkeyPatchShellCommand
+
+
+@pytest.fixture
 def monkeypatch_communicate_with_stderr() -> Callable[[Any, Any], tuple[Any, bytes]]:
     """Mock for Popen.communicate method that returns stderr."""
 
@@ -99,12 +118,15 @@ def monkeypatch_communicate_with_undecodable_output() -> Callable[
 
 
 @pytest.fixture
-def monkeypatch_wait() -> Callable[[Any, Any], int]:
-    """Mock for Popen.wait method that returns exit code != 0."""
+def monkeypatch_wait() -> Callable[[Exit_code], Callable[[Any, Any], Exit_code]]:
+    """Mock for Popen.wait method that returns needed exit code."""
 
-    def inner(*args: Any, **kwargs: Any) -> int:
-        _, _ = args, kwargs
-        return 1
+    def inner(exit_code: Exit_code) -> Callable[[Any, Any], Exit_code]:
+        def inner_in_inner(*args: Any, **kwargs: Any) -> Exit_code:
+            _, _ = args, kwargs
+            return exit_code
+
+        return inner_in_inner
 
     return inner
 
@@ -128,10 +150,17 @@ def monkeypatch_execute() -> Callable[
 class TestCoordinatesModuleExceptions:
     """Test exceptions raising while getting current GPS coordinates."""
 
-    @pytest.mark.xfail(reason="don't know how to realize yet", run=False)
-    def test_no_internet(self) -> None:
+    def test_no_internet(
+        self,
+        monkeypatch: MonkeyPatch,
+        command_that_use_internet: Callable[[], Type[ShellCommand]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
+    ) -> None:
         """If there is no internet connection."""
-        assert isinstance(False, NoInternetConnection)
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", command_that_use_internet())
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
+        with pytest.raises(NoInternetConnection):
+            get_gps_coordinates()
 
     def test_no_such_command(
         self,
@@ -171,11 +200,11 @@ class TestCoordinatesModuleExceptions:
         self,
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
-        monkeypatch_wait: Callable[[], Callable[[Any, Any], int]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
     ) -> None:
         """If command for getting current GPS coordinates returns code != 0."""
         monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
-        monkeypatch.setattr(Popen, "wait", monkeypatch_wait)
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
@@ -263,10 +292,17 @@ class TestWeatherApiServiceExceptions:
 
     coordinates = Coordinates(latitude=50, longitude=50)
 
-    @pytest.mark.xfail(reason="don't know how to realize yet", run=False)
-    def test_no_internet(self) -> None:
+    def test_no_internet(
+        self,
+        monkeypatch: MonkeyPatch,
+        command_that_use_internet: Callable[[], Type[ShellCommand]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
+    ) -> None:
         """If there is no internet connection."""
-        assert isinstance(False, NoInternetConnection)
+        monkeypatch.setattr(shell_command, "ShellCommand", command_that_use_internet)
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
+        with pytest.raises(NoInternetConnection):
+            get_weather(self.coordinates)
 
     def test_no_such_command(
         self,
@@ -318,11 +354,11 @@ class TestWeatherApiServiceExceptions:
         self,
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
-        monkeypatch_wait: Callable[[], Callable[[Any, Any], int]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
     ) -> None:
         """If command for getting weather by GPS coordinates returns code != 0."""
         monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
-        monkeypatch.setattr(Popen, "wait", monkeypatch_wait)
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
 
