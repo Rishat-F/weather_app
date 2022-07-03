@@ -14,6 +14,7 @@ from exceptions import (
     CantGetGpsCoordinates,
     CantGetWeather,
     CommandRunsTooLong,
+    NoInternetConnection,
     NoOpenWeatherApiKey,
     NoSuchCommand,
 )
@@ -23,6 +24,7 @@ from weather_api_service import get_weather
 Undecodable_bytes = bytes
 Exit_code = int
 NON_ZERO_EXIT_CODE = 1
+NO_INTERNET_EXIT_CODE = 100
 
 
 @pytest.fixture
@@ -70,6 +72,28 @@ def usual_command() -> Type[ShellCommand]:
             self.arguments = []
             self.timeout = 0.5
             self.no_internet_exit_code = None
+
+    return MonkeyPatchShellCommand
+
+
+@pytest.fixture
+def command_that_use_internet() -> Type[ShellCommand]:
+    """
+    Fixture for shell command that use internet.
+
+    Specifically this is a fixture for shell command that returns
+    specific exit code if there is no internet connection.
+    """
+
+    class MonkeyPatchShellCommand(ShellCommand):
+        """Mock for ShellCommand.__init__ method."""
+
+        def __init__(self, *args: Any, **kwargs: Any):
+            _, _ = args, kwargs
+            self.executable = "echo"
+            self.arguments = []
+            self.timeout = 0.5
+            self.no_internet_exit_code = NO_INTERNET_EXIT_CODE
 
     return MonkeyPatchShellCommand
 
@@ -140,6 +164,18 @@ class TestCoordinatesModuleExceptions:
         """If there is no command in system for getting current GPS coordinates."""
         monkeypatch.setattr("coordinates.GET_GPS_COMMAND", not_existing_command())
         with pytest.raises(NoSuchCommand):
+            get_gps_coordinates()
+
+    def test_no_internet(
+        self,
+        monkeypatch: MonkeyPatch,
+        command_that_use_internet: Callable[[], Type[ShellCommand]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
+    ) -> None:
+        """If there is no internet connection."""
+        monkeypatch.setattr("coordinates.GET_GPS_COMMAND", command_that_use_internet())
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
+        with pytest.raises(NoInternetConnection):
             get_gps_coordinates()
 
     def test_command_runs_too_long(
@@ -270,6 +306,18 @@ class TestWeatherApiServiceExceptions:
         """If there is no command in system for getting weather by GPS coordinates."""
         monkeypatch.setattr(shell_command, "ShellCommand", not_existing_command)
         with pytest.raises(NoSuchCommand):
+            get_weather(self.coordinates)
+
+    def test_no_internet(
+        self,
+        monkeypatch: MonkeyPatch,
+        command_that_use_internet: Callable[[], Type[ShellCommand]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
+    ) -> None:
+        """If there is no internet connection."""
+        monkeypatch.setattr(shell_command, "ShellCommand", command_that_use_internet)
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
+        with pytest.raises(NoInternetConnection):
             get_weather(self.coordinates)
 
     def test_no_open_weather_api_key(self, monkeypatch: MonkeyPatch) -> None:
