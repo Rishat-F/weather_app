@@ -19,7 +19,7 @@ repos:
         args: [
           --strict,
           --python-executable,
-            /home/hacker/.cache/pypoetry/virtualenvs/weather-app-GGKQ7Kfk-py3.10,
+            /home/hacker/Documents/projects/weather_app/.venv/bin/python,
         ]
 
   - repo: https://github.com/pycqa/isort
