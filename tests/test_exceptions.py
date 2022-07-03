@@ -23,6 +23,7 @@ from weather_api_service import get_weather
 
 Undecodable_bytes = bytes
 Exit_code = int
+NON_ZERO_EXIT_CODE = 1
 NO_INTERNET_EXIT_CODE = 100
 
 
@@ -204,7 +205,7 @@ class TestCoordinatesModuleExceptions:
     ) -> None:
         """If command for getting current GPS coordinates returns code != 0."""
         monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
-        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NON_ZERO_EXIT_CODE))
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
@@ -358,7 +359,7 @@ class TestWeatherApiServiceExceptions:
     ) -> None:
         """If command for getting weather by GPS coordinates returns code != 0."""
         monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
-        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NON_ZERO_EXIT_CODE))
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
 
