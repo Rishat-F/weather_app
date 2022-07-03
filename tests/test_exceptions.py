@@ -78,7 +78,12 @@ def usual_command() -> Type[ShellCommand]:
 
 @pytest.fixture
 def command_that_use_internet() -> Type[ShellCommand]:
-    """Fixture for shell command that use internet."""
+    """
+    Fixture for shell command that use internet.
+
+    Specifically this is a fixture for shell command that returns
+    specific exit code if there is no internet connection.
+    """
 
     class MonkeyPatchShellCommand(ShellCommand):
         """Mock for ShellCommand.__init__ method."""
