@@ -27,3 +27,7 @@ class NoOpenWeatherApiKey(Exception):
 
 class CommandExecutionFailed(Exception):
     """Command execution ended with errors in stderr or exit_code != 0."""
+
+
+class NoInternetConnection(Exception):
+    """There is no internet connection."""
