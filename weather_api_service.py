@@ -28,6 +28,10 @@ Miles_per_hour = Speed
 Kilometers_per_hour = Speed
 
 
+COMMAND_EXECUTABLE = "curl"
+COMMAND_NO_INTERNET_EXIT_CODE = 6
+
+
 class OpenWeatherDict(TypedDict):
     """Response of the Open Weather API service."""
 
@@ -79,7 +83,7 @@ def get_weather(coordinates: Coordinates) -> Weather:
     else:
         weather = _get_weather_by_command(
             shell_command.ShellCommand(
-                executable="curl",
+                executable=COMMAND_EXECUTABLE,
                 arguments=[
                     config.OPEN_WEATHER_API_URL_PATTERN.format(
                         latitude=coordinates.latitude,
@@ -88,6 +92,7 @@ def get_weather(coordinates: Coordinates) -> Weather:
                         language=config.OPEN_WEATHER_API_LANG.value,
                     )
                 ],
+                no_internet_exit_code=COMMAND_NO_INTERNET_EXIT_CODE,
             )
         )
     return weather
