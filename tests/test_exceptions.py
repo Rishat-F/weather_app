@@ -67,6 +67,7 @@ def usual_command() -> Type[ShellCommand]:
             self.executable = "echo"
             self.arguments = []
             self.timeout = 0.5
+            self.no_internet_exit_code = None
 
     return MonkeyPatchShellCommand
 
