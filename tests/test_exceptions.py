@@ -21,6 +21,8 @@ from shell_command import ShellCommand
 from weather_api_service import get_weather
 
 Undecodable_bytes = bytes
+Exit_code = int
+NON_ZERO_EXIT_CODE = 1
 
 
 @pytest.fixture
@@ -98,12 +100,15 @@ def monkeypatch_communicate_with_undecodable_output() -> Callable[
 
 
 @pytest.fixture
-def monkeypatch_wait() -> Callable[[Any, Any], int]:
-    """Mock for Popen.wait method that returns exit code != 0."""
+def monkeypatch_wait() -> Callable[[Exit_code], Callable[[Any, Any], Exit_code]]:
+    """Mock for Popen.wait method that returns needed exit code."""
 
-    def inner(*args: Any, **kwargs: Any) -> int:
-        _, _ = args, kwargs
-        return 1
+    def inner(exit_code: Exit_code) -> Callable[[Any, Any], Exit_code]:
+        def inner_in_inner(*args: Any, **kwargs: Any) -> Exit_code:
+            _, _ = args, kwargs
+            return exit_code
+
+        return inner_in_inner
 
     return inner
 
@@ -165,11 +170,11 @@ class TestCoordinatesModuleExceptions:
         self,
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
-        monkeypatch_wait: Callable[[], Callable[[Any, Any], int]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
     ) -> None:
         """If command for getting current GPS coordinates returns code != 0."""
         monkeypatch.setattr("coordinates.GET_GPS_COMMAND", usual_command())
-        monkeypatch.setattr(Popen, "wait", monkeypatch_wait)
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NON_ZERO_EXIT_CODE))
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
@@ -307,11 +312,11 @@ class TestWeatherApiServiceExceptions:
         self,
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
-        monkeypatch_wait: Callable[[], Callable[[Any, Any], int]],
+        monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
     ) -> None:
         """If command for getting weather by GPS coordinates returns code != 0."""
         monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
-        monkeypatch.setattr(Popen, "wait", monkeypatch_wait)
+        monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NON_ZERO_EXIT_CODE))
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
 
