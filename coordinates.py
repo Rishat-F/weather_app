@@ -50,7 +50,12 @@ def _parse_coordinates(get_gps_command_output: str) -> Coordinates:
                 lat_lon_dict_pattern, get_gps_command_output
             ).group()  # type: ignore
         )
-    except (AttributeError, JSONDecodeError):
+    except AttributeError:
+        raise CantGetGpsCoordinates(
+            f"Shell command output:\n'{get_gps_command_output}'\nhas no dictionary "
+            f"with latitude and longitute inside itself"
+        )
+    except JSONDecodeError:
         raise CantGetGpsCoordinates(
             f"Shell command output:\n'{get_gps_command_output}'\nhas no dictionary "
             f"with latitude and longitute inside itself"
