@@ -14,6 +14,7 @@ from exceptions import (
     CantGetGpsCoordinates,
     CantGetWeather,
     CommandRunsTooLong,
+    NoInternetConnection,
     NoOpenWeatherApiKey,
     NoSuchCommand,
 )
@@ -126,6 +127,11 @@ def monkeypatch_execute() -> Callable[
 
 class TestCoordinatesModuleExceptions:
     """Test exceptions raising while getting current GPS coordinates."""
+
+    @pytest.mark.xfail(reason="don't know how to realize yet", run=False)
+    def test_no_internet(self) -> None:
+        """If there is no internet connection."""
+        assert isinstance(False, NoInternetConnection)
 
     def test_no_such_command(
         self,
@@ -256,6 +262,11 @@ class TestWeatherApiServiceExceptions:
     """Test exceptions raising while getting weather by GPS coordinates."""
 
     coordinates = Coordinates(latitude=50, longitude=50)
+
+    @pytest.mark.xfail(reason="don't know how to realize yet", run=False)
+    def test_no_internet(self) -> None:
+        """If there is no internet connection."""
+        assert isinstance(False, NoInternetConnection)
 
     def test_no_such_command(
         self,
