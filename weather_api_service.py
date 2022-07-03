@@ -123,7 +123,11 @@ def _parse_weather(command_output: str) -> Weather:
                 weather_dictionary_pattern, command_output
             ).group()  # type: ignore
         )
-    except (AttributeError, JSONDecodeError):
+    except AttributeError:
+        raise CantGetWeather(
+            f"Shell command output:\n'{command_output}'\nhas no dictionary inside"
+        )
+    except JSONDecodeError:
         raise CantGetWeather(
             f"Shell command output:\n'{command_output}'\nhas no dictionary inside"
         )
@@ -153,7 +157,12 @@ def _parse_weather_type(openweather_dict: OpenWeatherDict) -> WeatherType:
     """Return weather type from openweather response."""
     try:
         weather_type_id = str(openweather_dict["weather"][0]["id"])
-    except (IndexError, KeyError):
+    except IndexError:
+        raise ApiServiceError(
+            f"There is no weather type identifier in expected place "
+            f"of openweather response dictionary:\n{openweather_dict}"
+        )
+    except KeyError:
         raise ApiServiceError(
             f"There is no weather type identifier in expected place "
             f"of openweather response dictionary:\n{openweather_dict}"
