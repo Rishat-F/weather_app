@@ -3,7 +3,14 @@
 from subprocess import PIPE, Popen, TimeoutExpired
 from typing import List, NamedTuple
 
-from exceptions import CommandExecutionFailed, CommandRunsTooLong, NoSuchCommand
+from exceptions import (
+    CommandExecutionFailed,
+    CommandRunsTooLong,
+    NoInternetConnection,
+    NoSuchCommand,
+)
+
+Exit_code = int
 
 
 class CommandExecutionResult(NamedTuple):
@@ -23,11 +30,18 @@ class ShellCommand:
     That's why there is a timeout field in this class.
     """
 
-    def __init__(self, executable: str, arguments: List[str] = [], timeout: float = 5):
+    def __init__(
+        self,
+        executable: str,
+        arguments: List[str] = [],
+        timeout: float = 5,
+        no_internet_exit_code: Exit_code | None = None,
+    ):
         """Shell command constructor."""
         self.executable = executable
         self.arguments = arguments
         self.timeout = timeout
+        self.no_internet_exit_code = no_internet_exit_code
 
     def execute(self) -> CommandExecutionResult:
         """Execute shell command."""
@@ -45,7 +59,13 @@ class ShellCommand:
             raise CommandRunsTooLong(
                 f"Command '{err.cmd}' runs more than {err.timeout} seconds"
             )
-        if stderr is not None or exit_code != 0:
+        if exit_code == self.no_internet_exit_code:
+            raise NoInternetConnection(
+                f"There is no internet connection. "
+                f"Command {[self.executable, *self.arguments]} "  # type: ignore
+                f"has ended with\nexit_code: {exit_code}\nstderr: {stderr}"
+            )
+        elif stderr is not None or exit_code != 0:
             raise CommandExecutionFailed(
                 f"Command has ended with exit_code: "
                 f"{exit_code} and stderr:\n{stderr}"  # type: ignore
