@@ -16,6 +16,7 @@ from exceptions import (
     CommandExecutionFailed,
     NoOpenWeatherApiKey,
 )
+from shell_command import CURL, CURL_SILENT_ARG
 
 Temperature = int
 Celsius = Temperature
@@ -28,7 +29,6 @@ Miles_per_hour = Speed
 Kilometers_per_hour = Speed
 
 
-COMMAND_EXECUTABLE = "curl"
 COMMAND_NO_INTERNET_EXIT_CODE = 6
 
 
@@ -83,14 +83,15 @@ def get_weather(coordinates: Coordinates) -> Weather:
     else:
         weather = _get_weather_by_command(
             shell_command.ShellCommand(
-                executable=COMMAND_EXECUTABLE,
+                executable=CURL,
                 arguments=[
                     config.OPEN_WEATHER_API_URL_PATTERN.format(
                         latitude=coordinates.latitude,
                         longitude=coordinates.longitude,
                         api_key=config.OPEN_WEATHER_API_KEY,
                         language=config.OPEN_WEATHER_API_LANG.value,
-                    )
+                    ),
+                    CURL_SILENT_ARG,
                 ],
                 no_internet_exit_code=COMMAND_NO_INTERNET_EXIT_CODE,
             )

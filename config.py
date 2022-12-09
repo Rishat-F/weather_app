@@ -53,3 +53,5 @@ WEATHER_DISPLAYING_PATTERN = (
     "Восход: {sunrise}\n"
     "Закат: {sunset}\n"
 )
+
+CURRENT_LOCATION_INFO_SERVICE_URL = "https://ipinfo.io/json"

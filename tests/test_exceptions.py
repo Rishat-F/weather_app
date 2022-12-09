@@ -230,7 +230,6 @@ class TestCoordinatesModuleExceptions:
         with pytest.raises(CantGetGpsCoordinates):
             get_gps_coordinates()
 
-    @pytest.mark.xfail(reason="right regex in _parse_coordinates not realized yet")
     @pytest.mark.parametrize(
         "command_output",
         [

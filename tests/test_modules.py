@@ -16,7 +16,6 @@ from weather_api_service import Weather, WeatherType, get_weather
 from weather_formatter import format_weather
 
 
-@pytest.mark.xfail(reason="Getting current GPS coordinates dont work yet.")
 class TestGettingGpsCoordinates:
     """Tests for coordinates.py module."""
 

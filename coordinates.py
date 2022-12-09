@@ -1,14 +1,17 @@
 """Getting current GPS coordinates."""
 
 import json
-import re
 from json.decoder import JSONDecodeError
 from typing import NamedTuple
 
+from config import CURRENT_LOCATION_INFO_SERVICE_URL
 from exceptions import CantGetGpsCoordinates, CommandExecutionFailed
-from shell_command import ShellCommand
+from shell_command import CURL, CURL_SILENT_ARG, ShellCommand
 
-GET_GPS_COMMAND = ShellCommand(executable="whereami", arguments=["-f", "json"])
+GET_GPS_COMMAND = ShellCommand(
+    executable=CURL,
+    arguments=[CURL_SILENT_ARG, CURRENT_LOCATION_INFO_SERVICE_URL],
+)
 
 
 class Coordinates(NamedTuple):
@@ -42,15 +45,10 @@ def _get_gps_coordinates_by_command(command: ShellCommand) -> Coordinates:
 
 def _parse_coordinates(get_gps_command_output: str) -> Coordinates:
     """Return GPS coordinates from output of shell command."""
-    # Reqex pattern for dictionary including latitude and longitude inside itself
-    lat_lon_dict_pattern = r"{.*}"
     try:
-        lat_lon_dict = json.loads(
-            re.search(
-                lat_lon_dict_pattern, get_gps_command_output
-            ).group()  # type: ignore
-        )
-    except AttributeError:
+        gps_info = json.loads(get_gps_command_output)
+        latitude, longitude = map(float, gps_info["loc"].split(","))
+    except KeyError:
         raise CantGetGpsCoordinates(
             f"Shell command output:\n'{get_gps_command_output}'\nhas no dictionary "
             f"with latitude and longitute inside itself"
@@ -60,9 +58,12 @@ def _parse_coordinates(get_gps_command_output: str) -> Coordinates:
             f"Shell command output:\n'{get_gps_command_output}'\nhas no dictionary "
             f"with latitude and longitute inside itself"
         )
-    return Coordinates(
-        latitude=lat_lon_dict["latitude"], longitude=lat_lon_dict["longitude"]
-    )
+    except ValueError:
+        raise CantGetGpsCoordinates(
+            f"Shell command output:\n'{get_gps_command_output}'\nhas no dictionary "
+            f"with latitude and longitute inside itself"
+        )
+    return Coordinates(latitude=latitude, longitude=longitude)
 
 
 if __name__ == "__main__":

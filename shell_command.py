@@ -12,6 +12,9 @@ from exceptions import (
 
 Exit_code = int
 
+CURL = "curl"
+CURL_SILENT_ARG = "-s"
+
 
 class CommandExecutionResult(NamedTuple):
     """Result of shell command execution."""
