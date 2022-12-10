@@ -18,7 +18,17 @@ from converters import (
 )
 from coordinates import Coordinates, get_gps_coordinates
 from weather import main
-from weather_api_service import Weather, WeatherType, get_weather
+from weather_api_service import (
+    Celsius,
+    Fahrenheit,
+    Kelvin,
+    Kilometers_per_hour,
+    Meters_per_second,
+    Miles_per_hour,
+    Weather,
+    WeatherType,
+    get_weather,
+)
 from weather_formatter import format_weather
 
 
@@ -141,35 +151,67 @@ class TestDisplayingWeather:
 class TestConverters:
     """Tests for converters.py module."""
 
-    def test_convert_to_kelvin(self) -> None:
+    @pytest.mark.parametrize(
+        "temperature_celsius,temperature_kelvin",
+        [
+            (0, 273),
+            (-273, 0),
+        ],
+    )
+    def test_convert_to_kelvin(
+        self, temperature_celsius: Celsius, temperature_kelvin: Kelvin
+    ) -> None:
         """Test converting temperature from °C to °K."""
-        assert convert_to_kelvin(0) == 273
-        assert convert_to_kelvin(-273) == 0
+        assert convert_to_kelvin(temperature_celsius) == temperature_kelvin
 
-    def test_convert_to_fahrenheit(self) -> None:
+    @pytest.mark.parametrize(
+        "temperature_celsius,temperature_fahrenheit",
+        [
+            (-10, 14),
+            (-1, 30),
+            (0, 32),
+            (16, 61),
+        ],
+    )
+    def test_convert_to_fahrenheit(
+        self, temperature_celsius: Celsius, temperature_fahrenheit: Fahrenheit
+    ) -> None:
         """Test converting temperature from °C to °F."""
-        assert convert_to_fahrenheit(-10) == 14
-        assert convert_to_fahrenheit(-1) == 30
-        assert convert_to_fahrenheit(0) == 32
-        assert convert_to_fahrenheit(16) == 61
+        assert convert_to_fahrenheit(temperature_celsius) == temperature_fahrenheit
 
-    def test_convert_to_kph(self) -> None:
+    @pytest.mark.parametrize(
+        "speed_mps, speed_kmph",
+        [
+            (0.0, 0.0),
+            (1.0, 3.6),
+            (1.88, 6.8),
+            (3.123, 11.2),
+            (5, 18.0),
+            (10.0, 36.0),
+        ],
+    )
+    def test_convert_to_kph(
+        self, speed_mps: Meters_per_second, speed_kmph: Kilometers_per_hour
+    ) -> None:
         """Test converting speed from m/s to km/h."""
-        assert convert_to_kph(0.0) == 0.0
-        assert convert_to_kph(1.0) == 3.6
-        assert convert_to_kph(1.88) == 6.8
-        assert convert_to_kph(3.123) == 11.2
-        assert convert_to_kph(5) == 18.0
-        assert convert_to_kph(10.0) == 36.0
+        assert convert_to_kph(speed_mps) == speed_kmph
 
-    def test_convert_to_mph(self) -> None:
+    @pytest.mark.parametrize(
+        "speed_mps, speed_mph",
+        [
+            (0.0, 0.0),
+            (1.0, 2.2),
+            (2, 4.5),
+            (3.55, 7.9),
+            (6.442, 14.4),
+            (10.0, 22.4),
+        ],
+    )
+    def test_convert_to_mph(
+        self, speed_mps: Meters_per_second, speed_mph: Miles_per_hour
+    ) -> None:
         """Test converting speed from m/s to mph."""
-        assert convert_to_mph(0.0) == 0.0
-        assert convert_to_mph(1.0) == 2.2
-        assert convert_to_mph(2) == 4.5
-        assert convert_to_mph(3.55) == 7.9
-        assert convert_to_mph(6.442) == 14.4
-        assert convert_to_mph(10.0) == 22.4
+        assert convert_to_mph(speed_mps) == speed_mph
 
 
 class TestConfigs:
