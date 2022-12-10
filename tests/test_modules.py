@@ -18,7 +18,17 @@ from converters import (
 )
 from coordinates import Coordinates, get_gps_coordinates
 from weather import main
-from weather_api_service import Weather, WeatherType, get_weather, Celsius, Kelvin, Fahrenheit
+from weather_api_service import (
+    Celsius,
+    Fahrenheit,
+    Kelvin,
+    Kilometers_per_hour,
+    Meters_per_second,
+    Miles_per_hour,
+    Weather,
+    WeatherType,
+    get_weather,
+)
 from weather_formatter import format_weather
 
 
@@ -148,9 +158,11 @@ class TestConverters:
             (-273, 0),
         ],
     )
-    def test_convert_to_kelvin(self, temperature_celsius: Celsius, temperature_kelvin: Kelvin) -> None:
+    def test_convert_to_kelvin(
+        self, temperature_celsius: Celsius, temperature_kelvin: Kelvin
+    ) -> None:
         """Test converting temperature from °C to °K."""
-        assert convert_to_kelvin(temperature_celcius) == temperature_kelvin
+        assert convert_to_kelvin(temperature_celsius) == temperature_kelvin
 
     @pytest.mark.parametrize(
         "temperature_celsius,temperature_fahrenheit",
@@ -161,7 +173,9 @@ class TestConverters:
             (16, 61),
         ],
     )
-    def test_convert_to_fahrenheit(self, temperature_celsius: Celsius, temperature_fahrenheit: Fahrenheit) -> None:
+    def test_convert_to_fahrenheit(
+        self, temperature_celsius: Celsius, temperature_fahrenheit: Fahrenheit
+    ) -> None:
         """Test converting temperature from °C to °F."""
         assert convert_to_fahrenheit(temperature_celsius) == temperature_fahrenheit
 
@@ -176,7 +190,9 @@ class TestConverters:
             (10.0, 36.0),
         ],
     )
-    def test_convert_to_kph(self, speed_mps: Meters_per_second, speed_kmph: Kilometers_per_hour) -> None:
+    def test_convert_to_kph(
+        self, speed_mps: Meters_per_second, speed_kmph: Kilometers_per_hour
+    ) -> None:
         """Test converting speed from m/s to km/h."""
         assert convert_to_kph(speed_mps) == speed_kmph
 
@@ -191,9 +207,12 @@ class TestConverters:
             (10.0, 22.4),
         ],
     )
-    def test_convert_to_mph(self, speed_mps: Meters_per_second, speed_mph: Miles_per_hour) -> None:
+    def test_convert_to_mph(
+        self, speed_mps: Meters_per_second, speed_mph: Miles_per_hour
+    ) -> None:
         """Test converting speed from m/s to mph."""
         assert convert_to_mph(speed_mps) == speed_mph
+
 
 class TestConfigs:
     """Tests for config.py module."""
