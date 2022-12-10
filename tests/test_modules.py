@@ -1,7 +1,10 @@
 """Tests for application modules."""
 
 import numbers
+import sys
 from datetime import datetime
+from io import StringIO
+from typing import Any
 
 import pytest
 from pytest import MonkeyPatch
@@ -14,6 +17,7 @@ from converters import (
     convert_to_mph,
 )
 from coordinates import Coordinates, get_gps_coordinates
+from weather import main
 from weather_api_service import Weather, WeatherType, get_weather
 from weather_formatter import format_weather
 
@@ -97,6 +101,41 @@ class TestFormattingWeather:
         )
         actual_displaying_weather = format_weather(weather)
         assert expected_displaying_weather == actual_displaying_weather
+
+
+class TestDisplayingWeather:
+    """Check that programm really display weather in terminal."""
+
+    def test_display_weather(self, monkeypatch: MonkeyPatch) -> None:
+        """Check weather printing."""
+
+        def mock_get_gps_coordinates() -> None:
+            """Mock get_coordinates function."""
+            return None
+
+        def mock_get_weather(_: Any) -> Weather:
+            """Mock get_weather function."""
+            weather = Weather(
+                temperature=15,
+                weather_type=WeatherType.CLOUDS,
+                weather_description="Переменная облачность",
+                wind_speed=2.5,
+                sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
+                sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
+                city="moscow",
+            )
+            return weather
+
+        mock_io = StringIO()
+        monkeypatch.setattr("sys.stdout", mock_io)
+        monkeypatch.setattr("weather.get_gps_coordinates", mock_get_gps_coordinates)
+        monkeypatch.setattr("weather.get_weather", mock_get_weather)
+        main()
+        expected_displaying_weather = (
+            "Moscow, 15°C, Облачно\n\nПеременная облачность\n"
+            "Ветер: 2.5m/s\nВосход: 04:00\nЗакат: 20:25\n\n"
+        )
+        assert sys.stdout.getvalue() == expected_displaying_weather  # type: ignore
 
 
 class TestConverters:
