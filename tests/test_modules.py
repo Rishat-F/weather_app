@@ -17,6 +17,9 @@ from coordinates import Coordinates, get_gps_coordinates
 from weather_api_service import Weather, WeatherType, get_weather
 from weather_formatter import format_weather
 
+temp = 15
+wind_sp = 2.5
+
 
 class TestGettingGpsCoordinates:
     """Tests for coordinates.py module."""
@@ -83,10 +86,10 @@ class TestFormattingWeather:
     def test_weather_formatter(self) -> None:
         """False test."""
         weather = Weather(
-            temperature=15,
+            temperature=temp,
             weather_type=WeatherType.CLOUDS,
             weather_description="Переменная облачность",
-            wind_speed=2.5,
+            wind_speed=wind_sp,
             sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
             sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
             city="moscow",
@@ -139,10 +142,10 @@ class TestConfigs:
     def setup_method(self) -> None:
         """Setup for all tests."""  # noqa
         self.weather = Weather(
-            temperature=15,
+            temperature=temp,
             weather_type=WeatherType.CLOUDS,
             weather_description="Переменная облачность",
-            wind_speed=2.5,
+            wind_speed=wind_sp,
             sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
             sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
             city="Moscow",
