@@ -19,7 +19,7 @@ from weather_formatter import format_weather
 class TestGettingGpsCoordinates:
     """Tests for coordinates.py module."""
 
-    def setup(self) -> None:
+    def setup_method(self) -> None:
         """Setup for all tests."""  # noqa
         self.coordinates = get_gps_coordinates()
 
@@ -41,7 +41,7 @@ class TestGettingGpsCoordinates:
 class TestGettingWeather:
     """Tests for weather_api_service.py module."""
 
-    def setup(self) -> None:
+    def setup_method(self) -> None:
         """Setup for all tests."""  # noqa
         coordinates = Coordinates(latitude=55.75, longitude=52.43)
         self.weather = get_weather(coordinates)
@@ -135,7 +135,7 @@ class TestConverters:
 class TestConfigs:
     """Tests for config.py module."""
 
-    def setup(self) -> None:
+    def setup_method(self) -> None:
         """Setup for all tests."""  # noqa
         self.weather = Weather(
             temperature=15,
