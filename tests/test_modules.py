@@ -4,7 +4,9 @@ import numbers
 from datetime import datetime
 
 import pytest
+from pytest import MonkeyPatch
 
+from config import SpeedUnit, TemperatureUnit
 from converters import (
     convert_to_fahrenheit,
     convert_to_kelvin,
@@ -131,7 +133,6 @@ class TestConverters:
         assert convert_to_mph(10.0) == 22.4
 
 
-@pytest.mark.xfail(reason="test not realized yet", run=False)
 class TestConfigs:
     """Tests for config.py module."""
 
@@ -147,26 +148,84 @@ class TestConfigs:
             city="Moscow",
         )
 
+    @pytest.mark.xfail(reason="test not realized yet", run=False)
     def test_ru_language(self) -> None:
         """Test Open Weather API service work with lang=ru config."""
         assert False
 
+    @pytest.mark.xfail(reason="test not realized yet", run=False)
     def test_en_language(self) -> None:
         """Test Open Weather API service work with lang=en config."""
         assert False
 
-    def test_temperature_unit(self) -> None:
+    @pytest.mark.parametrize(
+        "temperature_unit,expected_temperature",
+        [
+            (TemperatureUnit.CELSIUS, "15°C"),
+            (TemperatureUnit.KELVIN, "288°K"),
+            (TemperatureUnit.FAHRENHEIT, "59°F"),
+        ],
+    )
+    def test_temperature_unit(
+        self,
+        monkeypatch: MonkeyPatch,
+        temperature_unit: TemperatureUnit,
+        expected_temperature: str,
+    ) -> None:
         """Test weather displaying in/with configured temperature unit."""
-        assert "15°C" in format_weather(self.weather)
-        assert "288°K" in format_weather(self.weather)
-        assert "59°F" in format_weather(self.weather)
+        monkeypatch.setattr("config.TEMPERATURE_UNIT", temperature_unit)
+        assert expected_temperature in format_weather(self.weather)
 
-    def test_speed_unit(self) -> None:
+    @pytest.mark.parametrize(
+        "speed_unit,expected_speed",
+        [
+            (SpeedUnit.METERS_PER_SECOND, "2.5m/s"),
+            (SpeedUnit.KILOMETERS_PER_HOUR, "9.0km/h"),
+            (SpeedUnit.MILES_PER_HOUR, "5.6mph"),
+        ],
+    )
+    def test_speed_unit(
+        self,
+        monkeypatch: MonkeyPatch,
+        speed_unit: SpeedUnit,
+        expected_speed: str,
+    ) -> None:
         """Test weather displaying in/with configured speed unit."""
-        assert "2.5m/s" in format_weather(self.weather)
-        assert "9.0km/h" in format_weather(self.weather)
-        assert "5.5mph" in format_weather(self.weather)
+        monkeypatch.setattr("config.SPEED_UNIT", speed_unit)
+        assert expected_speed in format_weather(self.weather)
 
-    def test_different_weather_displayings(self) -> None:
+    @pytest.mark.parametrize(
+        "weather_displaying_pattern, expected_displaying_weather",
+        [
+            (
+                (
+                    "{city}\n{temperature}{temperature_unit}, {weather_type}\n\n"
+                    "Ветер: {wind_speed}{speed_unit}\n"
+                    "Восход: {sunrise}\n"
+                    "Закат: {sunset}\n"
+                ),
+                (
+                    "Moscow\n15°C, Облачно\n\n"
+                    "Ветер: 2.5m/s\n"
+                    "Восход: 04:00\n"
+                    "Закат: 20:25\n"
+                ),
+            ),
+            (
+                "{city}\n{temperature}{temperature_unit}, {weather_type}\n\n",
+                "Moscow\n15°C, Облачно\n\n",
+            ),
+        ],
+    )
+    def test_different_weather_displayings(
+        self,
+        monkeypatch: MonkeyPatch,
+        weather_displaying_pattern: str,
+        expected_displaying_weather: str,
+    ) -> None:
         """Test different weather displaying patterns."""
-        assert isinstance(self.weather, type(None))
+        monkeypatch.setattr(
+            "config.WEATHER_DISPLAYING_PATTERN", weather_displaying_pattern
+        )
+        actual_displaying_weather = format_weather(self.weather)
+        assert actual_displaying_weather == expected_displaying_weather
