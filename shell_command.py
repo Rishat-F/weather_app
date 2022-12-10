@@ -14,6 +14,7 @@ Exit_code = int
 
 CURL = "curl"
 CURL_SILENT_ARG = "-s"
+CURL_NO_INTERNET_CONNECTION_EXIT_CODE = 6
 
 
 class CommandExecutionResult(NamedTuple):
