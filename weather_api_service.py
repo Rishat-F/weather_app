@@ -16,7 +16,7 @@ from exceptions import (
     CommandExecutionFailed,
     NoOpenWeatherApiKey,
 )
-from shell_command import CURL, CURL_SILENT_ARG
+from shell_command import CURL, CURL_NO_INTERNET_CONNECTION_EXIT_CODE, CURL_SILENT_ARG
 
 Temperature = int
 Celsius = Temperature
@@ -27,9 +27,6 @@ Speed = float
 Meters_per_second = Speed
 Miles_per_hour = Speed
 Kilometers_per_hour = Speed
-
-
-COMMAND_NO_INTERNET_EXIT_CODE = 6
 
 
 class OpenWeatherDict(TypedDict):
@@ -93,7 +90,7 @@ def get_weather(coordinates: Coordinates) -> Weather:
                     ),
                     CURL_SILENT_ARG,
                 ],
-                no_internet_exit_code=COMMAND_NO_INTERNET_EXIT_CODE,
+                no_internet_exit_code=CURL_NO_INTERNET_CONNECTION_EXIT_CODE,
             )
         )
     return weather

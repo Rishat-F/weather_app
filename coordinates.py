@@ -6,11 +6,17 @@ from typing import NamedTuple
 
 from config import CURRENT_LOCATION_INFO_SERVICE_URL
 from exceptions import CantGetGpsCoordinates, CommandExecutionFailed
-from shell_command import CURL, CURL_SILENT_ARG, ShellCommand
+from shell_command import (
+    CURL,
+    CURL_NO_INTERNET_CONNECTION_EXIT_CODE,
+    CURL_SILENT_ARG,
+    ShellCommand,
+)
 
 GET_GPS_COMMAND = ShellCommand(
     executable=CURL,
     arguments=[CURL_SILENT_ARG, CURRENT_LOCATION_INFO_SERVICE_URL],
+    no_internet_exit_code=CURL_NO_INTERNET_CONNECTION_EXIT_CODE,
 )
 
 
