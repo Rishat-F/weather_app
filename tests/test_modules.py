@@ -66,29 +66,41 @@ class TestGettingWeather:
         """Check get_weather returns Weather type."""
         assert isinstance(self.weather, Weather)
 
-    def test_weather_has_right_attributes(self) -> None:
+    @pytest.mark.parametrize(
+        "attribute",
+        [
+            "temperature",
+            "weather_type",
+            "weather_description",
+            "wind_speed",
+            "sunrise",
+            "sunset",
+            "city",
+        ],
+    )
+    def test_weather_has_right_attributes(self, attribute: str) -> None:
         """Check weather has next attributes.
 
         temperature, weather_type, weather_description,
         wind_speed, sunrise, sunset, city
         """
-        assert hasattr(self.weather, "temperature")
-        assert hasattr(self.weather, "weather_type")
-        assert hasattr(self.weather, "weather_description")
-        assert hasattr(self.weather, "wind_speed")
-        assert hasattr(self.weather, "sunrise")
-        assert hasattr(self.weather, "sunset")
-        assert hasattr(self.weather, "city")
+        assert hasattr(self.weather, attribute)
 
-    def test_weather_attributes_types(self) -> None:
+    @pytest.mark.parametrize(
+        "weather_attr,type_",
+        [
+            ("temperature", numbers.Real),
+            ("weather_type", WeatherType),
+            ("weather_description", str),
+            ("wind_speed", numbers.Real),
+            ("sunrise", datetime),
+            ("sunset", datetime),
+            ("city", str),
+        ],
+    )
+    def test_weather_attributes_types(self, weather_attr: str, type_: Any) -> None:
         """Check weather attributes has right types."""
-        assert isinstance(self.weather.temperature, numbers.Real)
-        assert isinstance(self.weather.weather_type, WeatherType)
-        assert isinstance(self.weather.weather_description, str)
-        assert isinstance(self.weather.wind_speed, numbers.Real)
-        assert isinstance(self.weather.sunrise, datetime)
-        assert isinstance(self.weather.sunset, datetime)
-        assert isinstance(self.weather.city, str)
+        assert isinstance(getattr(self.weather, weather_attr), type_)
 
 
 class TestFormattingWeather:
