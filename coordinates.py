@@ -69,6 +69,11 @@ def _parse_coordinates(get_gps_command_output: str) -> Coordinates:
             f"Shell command output:\n'{get_gps_command_output}'\nhas no dictionary "
             f"with latitude and longitute inside itself"
         )
+    except AttributeError:
+        raise CantGetGpsCoordinates(
+            f"Shell command output:\n'{get_gps_command_output}'\nhas no dictionary "
+            f"with latitude and longitute inside itself"
+        )
     return Coordinates(latitude=latitude, longitude=longitude)
 
 

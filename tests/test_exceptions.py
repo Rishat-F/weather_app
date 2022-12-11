@@ -233,6 +233,8 @@ class TestCoordinatesModuleExceptions:
     @pytest.mark.parametrize(
         "command_output",
         [
+            '{"loc": null}',
+            '{"loc": "undefined"}',
             '{"latitude": 50}',
             '{"longitude": 50}',
             '{"latitude": 50, "longitud": 50}',
