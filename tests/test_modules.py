@@ -9,6 +9,7 @@ from typing import Any
 import pytest
 from pytest import MonkeyPatch
 
+import config
 from config import SpeedUnit, TemperatureUnit
 from converters import (
     convert_to_fahrenheit,
@@ -30,6 +31,35 @@ from weather_api_service import (
     get_weather,
 )
 from weather_formatter import format_weather
+
+
+class SetupWeather:
+    """Create weather for tests."""
+
+    TEMPERATURE = 15
+    WEATHER_TYPE = WeatherType.CLOUDS
+    WEATHER_DESCRIPTION = "Переменная облачность"
+    WIND_SPEED = 2.5
+    SUNRISE = datetime.fromisoformat("2022-05-03 04:00:00")
+    SUNSET = datetime.fromisoformat("2022-05-03 20:25:14")
+    CITY = "moscow"
+
+    TEST_WEATHER = Weather(
+        temperature=TEMPERATURE,
+        weather_type=WEATHER_TYPE,
+        weather_description=WEATHER_DESCRIPTION,
+        wind_speed=WIND_SPEED,
+        sunrise=SUNRISE,
+        sunset=SUNSET,
+        city=CITY,
+    )
+    EXPECTED_DISPLAYING_WEATHER = (
+        f"{CITY.title()}, {TEMPERATURE}{config.TEMPERATURE_UNIT.value}, "
+        f"{WEATHER_TYPE.value}\n\n{WEATHER_DESCRIPTION}\n"
+        f"Ветер: {WIND_SPEED}{config.SPEED_UNIT.value}\n"
+        f"Восход: {SUNRISE.strftime('%H:%M')}\n"
+        f"Закат: {SUNSET.strftime('%H:%M')}\n"
+    )
 
 
 class TestGettingGpsCoordinates:
@@ -105,29 +135,16 @@ class TestGettingWeather:
         assert isinstance(getattr(self.weather, weather_attr), type_)
 
 
-class TestFormattingWeather:
+class TestFormattingWeather(SetupWeather):
     """Tests for weather_formatter.py module."""
 
     def test_weather_formatter(self) -> None:
         """False test."""
-        weather = Weather(
-            temperature=15,
-            weather_type=WeatherType.CLOUDS,
-            weather_description="Переменная облачность",
-            wind_speed=2.5,
-            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
-            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-            city="moscow",
-        )
-        expected_displaying_weather = (
-            "Moscow, 15°C, Облачно\n\nПеременная облачность\n"
-            "Ветер: 2.5m/s\nВосход: 04:00\nЗакат: 20:25\n"
-        )
-        actual_displaying_weather = format_weather(weather)
-        assert expected_displaying_weather == actual_displaying_weather
+        actual_displaying_weather = format_weather(self.TEST_WEATHER)
+        assert actual_displaying_weather == self.EXPECTED_DISPLAYING_WEATHER
 
 
-class TestDisplayingWeather:
+class TestDisplayingWeather(SetupWeather):
     """Check that programm really display weather in terminal."""
 
     def test_display_weather(self, monkeypatch: MonkeyPatch) -> None:
@@ -139,27 +156,17 @@ class TestDisplayingWeather:
 
         def mock_get_weather(_: Any) -> Weather:
             """Mock get_weather function."""
-            weather = Weather(
-                temperature=15,
-                weather_type=WeatherType.CLOUDS,
-                weather_description="Переменная облачность",
-                wind_speed=2.5,
-                sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
-                sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-                city="moscow",
-            )
-            return weather
+            return self.TEST_WEATHER
 
         mock_io = StringIO()
         monkeypatch.setattr("sys.stdout", mock_io)
         monkeypatch.setattr("weather.get_gps_coordinates", mock_get_gps_coordinates)
         monkeypatch.setattr("weather.get_weather", mock_get_weather)
         main()
-        expected_displaying_weather = (
-            "Moscow, 15°C, Облачно\n\nПеременная облачность\n"
-            "Ветер: 2.5m/s\nВосход: 04:00\nЗакат: 20:25\n\n"
+        assert (
+            sys.stdout.getvalue()
+            == self.EXPECTED_DISPLAYING_WEATHER + "\n"  # type: ignore
         )
-        assert sys.stdout.getvalue() == expected_displaying_weather  # type: ignore
 
 
 class TestConverters:
@@ -228,21 +235,8 @@ class TestConverters:
         assert convert_to_mph(speed_mps) == speed_mph
 
 
-class TestConfigs:
+class TestConfigs(SetupWeather):
     """Tests for config.py module."""
-
-    @classmethod
-    def setup_class(cls) -> None:
-        """Setup for all tests."""  # noqa
-        cls.weather = Weather(
-            temperature=15,
-            weather_type=WeatherType.CLOUDS,
-            weather_description="Переменная облачность",
-            wind_speed=2.5,
-            sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
-            sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-            city="Moscow",
-        )
 
     @pytest.mark.xfail(reason="test not realized yet", run=False)
     def test_ru_language(self) -> None:
@@ -270,7 +264,7 @@ class TestConfigs:
     ) -> None:
         """Test weather displaying in/with configured temperature unit."""
         monkeypatch.setattr("config.TEMPERATURE_UNIT", temperature_unit)
-        assert expected_temperature in format_weather(self.weather)
+        assert expected_temperature in format_weather(self.TEST_WEATHER)
 
     @pytest.mark.parametrize(
         "speed_unit,expected_speed",
@@ -288,7 +282,7 @@ class TestConfigs:
     ) -> None:
         """Test weather displaying in/with configured speed unit."""
         monkeypatch.setattr("config.SPEED_UNIT", speed_unit)
-        assert expected_speed in format_weather(self.weather)
+        assert expected_speed in format_weather(self.TEST_WEATHER)
 
     @pytest.mark.parametrize(
         "weather_displaying_pattern, expected_displaying_weather",
@@ -323,5 +317,5 @@ class TestConfigs:
         monkeypatch.setattr(
             "weather_formatter.WEATHER_DISPLAYING_PATTERN", weather_displaying_pattern
         )
-        actual_displaying_weather = format_weather(self.weather)
+        actual_displaying_weather = format_weather(self.TEST_WEATHER)
         assert actual_displaying_weather == expected_displaying_weather
