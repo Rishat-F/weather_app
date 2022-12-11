@@ -24,3 +24,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.vulture]
 min_confidence = 70
 paths = ["."]
+
+# https://mypy.readthedocs.io/en/stable/config_file.html#example-pyproject-toml
+[[tool.mypy.overrides]]
+module = [
+    "tests.*",
+]
+ignore_errors = true
