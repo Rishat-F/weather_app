@@ -10,6 +10,8 @@ from exceptions import (
     NoSuchCommand,
 )
 
+SUCCESS_EXIT_CODE = 0
+
 Exit_code = int
 
 CURL = "curl"
@@ -69,7 +71,7 @@ class ShellCommand:
                 f"Command {[self.executable, *self.arguments]} "  # type: ignore
                 f"has ended with\nexit_code: {exit_code}\nstderr: {stderr}"
             )
-        elif stderr is not None or exit_code != 0:
+        elif stderr is not None or exit_code != SUCCESS_EXIT_CODE:
             raise CommandExecutionFailed(
                 f"Command has ended with exit_code: "
                 f"{exit_code} and stderr:\n{stderr}"  # type: ignore
