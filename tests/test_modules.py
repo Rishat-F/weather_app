@@ -35,9 +35,10 @@ from weather_formatter import format_weather
 class TestGettingGpsCoordinates:
     """Tests for coordinates.py module."""
 
-    def setup_method(self) -> None:
+    @classmethod
+    def setup_class(cls) -> None:
         """Setup for all tests."""  # noqa
-        self.coordinates = get_gps_coordinates()
+        cls.coordinates = get_gps_coordinates()
 
     def test_get_gps_coordinates_returns_coordinates(self) -> None:
         """Check get_gps_coordinates returns Coordinates type."""
@@ -57,10 +58,11 @@ class TestGettingGpsCoordinates:
 class TestGettingWeather:
     """Tests for weather_api_service.py module."""
 
-    def setup_method(self) -> None:
+    @classmethod
+    def setup_class(cls) -> None:
         """Setup for all tests."""  # noqa
         coordinates = Coordinates(latitude=55.75, longitude=52.43)
-        self.weather = get_weather(coordinates)
+        cls.weather = get_weather(coordinates)
 
     def test_get_weather_returns_weather(self) -> None:
         """Check get_weather returns Weather type."""
@@ -229,9 +231,10 @@ class TestConverters:
 class TestConfigs:
     """Tests for config.py module."""
 
-    def setup_method(self) -> None:
+    @classmethod
+    def setup_class(cls) -> None:
         """Setup for all tests."""  # noqa
-        self.weather = Weather(
+        cls.weather = Weather(
             temperature=15,
             weather_type=WeatherType.CLOUDS,
             weather_description="Переменная облачность",
