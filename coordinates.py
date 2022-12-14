@@ -75,7 +75,3 @@ def _parse_coordinates(get_gps_command_output: str) -> Coordinates:
             f"with latitude and longitute inside itself"
         )
     return Coordinates(latitude=latitude, longitude=longitude)
-
-
-if __name__ == "__main__":
-    print(get_gps_coordinates())

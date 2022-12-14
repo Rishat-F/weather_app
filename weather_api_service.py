@@ -236,7 +236,3 @@ def _parse_city(openweather_dict: OpenWeatherDict) -> str:
             f"There is no city name in expected place of "
             f"openweather response dictionary:\n{openweather_dict}"
         )
-
-
-if __name__ == "__main__":
-    print(get_weather(Coordinates(latitude=55.50, longitude=49.20)))

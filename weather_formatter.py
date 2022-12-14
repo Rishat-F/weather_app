@@ -60,23 +60,3 @@ def _convert_speed(
             return speed
         case _:
             return speed  # ToDo: warn config wind, speed shown in m/s
-
-
-if __name__ == "__main__":
-    from datetime import datetime
-
-    from weather_api_service import WeatherType
-
-    print(
-        format_weather(
-            Weather(
-                temperature=20,
-                weather_type=WeatherType.CLEAR,
-                weather_description="Малооблачная погода",
-                wind_speed=2.5,
-                sunrise=datetime.fromisoformat("2022-05-03 04:00:00"),
-                sunset=datetime.fromisoformat("2022-05-03 20:25:14"),
-                city="Moscow",
-            )
-        )
-    )
