@@ -43,6 +43,8 @@ def _convert_temperature(temperature: Celsius) -> Kelvin | Fahrenheit | Celsius:
             return convert_to_fahrenheit(temperature)
         case TemperatureUnit.CELSIUS:
             return temperature
+        case _:
+            return temperature  # ToDo: warn no such config, temperature shown in °C
 
 
 def _convert_speed(
@@ -56,6 +58,8 @@ def _convert_speed(
             return convert_to_mph(speed)
         case SpeedUnit.METERS_PER_SECOND:
             return speed
+        case _:
+            return speed  # ToDo: warn config wind, speed shown in m/s
 
 
 if __name__ == "__main__":
