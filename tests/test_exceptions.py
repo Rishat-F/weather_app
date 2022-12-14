@@ -438,6 +438,8 @@ class TestWeatherApiServiceExceptions:
             '"sys":{"sunrise":1656115279,"sunset":1656178205}}',
             'Invalid dictionary: {"invalid": "dictionary"}',
             "{}",
+            '{"weather":[],"main":{"temp":20.29}}',
+            '{"weather":[{"id": "_"}],"main":{"temp":20.29}}',
         ],
     )
     def test_command_output_has_invalid_dictionary(
