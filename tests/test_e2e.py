@@ -45,7 +45,7 @@ class TestE2E(WeatherCommand):
         expected_weather_output_pattern = (
             r"[\w ]+, [-+]?\d{1,3}(?:°C|°K|°F), [\w ]+\n\n"
             r"[\w ]+\n"
-            r"\w+: \d+\.\d\d(?:m/s|km/h|mph)\n"
+            r"\w+: \d+\.\d\d?(?:m/s|km/h|mph)\n"
             r"\w+: \d\d:\d\d\n"
             r"\w+: \d\d:\d\d"
         )
