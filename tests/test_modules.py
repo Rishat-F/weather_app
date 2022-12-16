@@ -315,7 +315,7 @@ class TestConfigs(SetupWeather):
     ) -> None:
         """Test different weather displaying patterns."""
         monkeypatch.setattr(
-            "weather_formatter.WEATHER_DISPLAYING_PATTERN", weather_displaying_pattern
+            "weather_formatter.weather_displaying_pattern", weather_displaying_pattern
         )
         actual_displaying_weather = format_weather(self.TEST_WEATHER)
         assert actual_displaying_weather == expected_displaying_weather
