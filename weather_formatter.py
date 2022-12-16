@@ -1,13 +1,14 @@
 """Preparing weather for printing in stdout."""
 
 import config
-from config import WEATHER_DISPLAYING_PATTERN, SpeedUnit, TemperatureUnit
+from config import SpeedUnit, TemperatureUnit
 from converters import (
     convert_to_fahrenheit,
     convert_to_kelvin,
     convert_to_kph,
     convert_to_mph,
 )
+from patterns import weather_displaying_pattern
 from weather_api_service import (
     Celsius,
     Fahrenheit,
@@ -21,7 +22,7 @@ from weather_api_service import (
 
 def format_weather(weather: Weather) -> str:
     """Format weather data in string."""
-    return WEATHER_DISPLAYING_PATTERN.format(
+    return weather_displaying_pattern.format(
         city=weather.city.capitalize(),
         temperature=_convert_temperature(weather.temperature),
         temperature_unit=config.TEMPERATURE_UNIT.value,

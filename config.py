@@ -34,24 +34,6 @@ class SpeedUnit(Enum):
 
 OPEN_WEATHER_API_KEY = os.getenv("OPEN_WEATHER_API_KEY", default=None)
 OPEN_WEATHER_API_LANG = OpenWeatherLanguage.RUSSIAN
-OPEN_WEATHER_API_URL_PATTERN = (
-    "https://api.openweathermap.org/data/2.5/weather?"
-    "lat={latitude}&"
-    "lon={longitude}&"
-    "appid={api_key}&"
-    "lang={language}&"
-    "units=metric"
-)
-
 TEMPERATURE_UNIT = TemperatureUnit.CELSIUS
 SPEED_UNIT = SpeedUnit.METERS_PER_SECOND
-
-WEATHER_DISPLAYING_PATTERN = (
-    "{city}, {temperature}{temperature_unit}, {weather_type}\n\n"
-    "{weather_description}\n"
-    "Ветер: {wind_speed}{speed_unit}\n"
-    "Восход: {sunrise}\n"
-    "Закат: {sunset}\n"
-)
-
 CURRENT_LOCATION_INFO_SERVICE_URL = "https://ipinfo.io/json"

@@ -8,6 +8,7 @@ from json.decoder import JSONDecodeError
 from typing import Dict, List, Literal, NamedTuple, TypedDict
 
 import config
+import patterns
 import shell_command
 from coordinates import Coordinates
 from exceptions import (
@@ -82,7 +83,7 @@ def get_weather(coordinates: Coordinates) -> Weather:
             shell_command.ShellCommand(
                 executable=CURL,
                 arguments=[
-                    config.OPEN_WEATHER_API_URL_PATTERN.format(
+                    patterns.open_weather_api_url_pattern.format(
                         latitude=coordinates.latitude,
                         longitude=coordinates.longitude,
                         api_key=config.OPEN_WEATHER_API_KEY,
