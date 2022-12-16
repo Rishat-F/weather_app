@@ -1,7 +1,7 @@
 """Shell command used by application."""
 
 from subprocess import PIPE, Popen, TimeoutExpired
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Optional
 
 from exceptions import (
     CommandExecutionFailed,
@@ -41,7 +41,7 @@ class ShellCommand:
         executable: str,
         arguments: List[str] = [],
         timeout: float = 5,
-        no_internet_exit_code: Exit_code | None = None,
+        no_internet_exit_code: Optional[Exit_code] = None,
     ):
         """Shell command constructor."""
         self.executable = executable
