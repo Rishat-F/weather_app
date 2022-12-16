@@ -18,7 +18,7 @@ class CommandExecutionResult(NamedTuple):
 class WeatherCommand:
     """Shell command for run application."""
 
-    PYTHON_EXECUTABLE = "python3.10"
+    PYTHON_EXECUTABLE = "python3.8"
     ENTRY_POINT = ["weather.py"]
 
     def execute(self) -> CommandExecutionResult:

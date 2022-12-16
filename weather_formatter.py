@@ -1,5 +1,7 @@
 """Preparing weather for printing in stdout."""
 
+from typing import Union
+
 import config
 from config import SpeedUnit, TemperatureUnit
 from converters import (
@@ -35,29 +37,29 @@ def format_weather(weather: Weather) -> str:
     )
 
 
-def _convert_temperature(temperature: Celsius) -> Kelvin | Fahrenheit | Celsius:
+def _convert_temperature(temperature: Celsius) -> Union[Kelvin, Fahrenheit, Celsius]:
     """Convert temperature."""
-    match config.TEMPERATURE_UNIT:
-        case TemperatureUnit.KELVIN:
-            return convert_to_kelvin(temperature)
-        case TemperatureUnit.FAHRENHEIT:
-            return convert_to_fahrenheit(temperature)
-        case TemperatureUnit.CELSIUS:
-            return temperature
-        case _:
-            return temperature  # ToDo: warn no such config, temperature shown in °C
+    if config.TEMPERATURE_UNIT is TemperatureUnit.KELVIN:
+        return convert_to_kelvin(temperature)
+    elif config.TEMPERATURE_UNIT is TemperatureUnit.FAHRENHEIT:
+        return convert_to_fahrenheit(temperature)
+    elif config.TEMPERATURE_UNIT is TemperatureUnit.CELSIUS:
+        return temperature
+    else:
+        config.TEMPERATURE_UNIT = TemperatureUnit.CELSIUS
+        return temperature  # ToDo: warn no such config, temperature shown in °C
 
 
 def _convert_speed(
     speed: Meters_per_second,
-) -> Miles_per_hour | Kilometers_per_hour | Meters_per_second:
+) -> Union[Miles_per_hour, Kilometers_per_hour, Meters_per_second]:
     """Convert speed."""
-    match config.SPEED_UNIT:
-        case SpeedUnit.KILOMETERS_PER_HOUR:
-            return convert_to_kph(speed)
-        case SpeedUnit.MILES_PER_HOUR:
-            return convert_to_mph(speed)
-        case SpeedUnit.METERS_PER_SECOND:
-            return speed
-        case _:
-            return speed  # ToDo: warn config wind, speed shown in m/s
+    if config.SPEED_UNIT is SpeedUnit.KILOMETERS_PER_HOUR:
+        return convert_to_kph(speed)
+    elif config.SPEED_UNIT is SpeedUnit.MILES_PER_HOUR:
+        return convert_to_mph(speed)
+    elif config.SPEED_UNIT is SpeedUnit.METERS_PER_SECOND:
+        return speed
+    else:
+        config.SPEED_UNIT = SpeedUnit.METERS_PER_SECOND
+        return speed  # ToDo: warn config wind, speed shown in m/s

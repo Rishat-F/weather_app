@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from enum import Enum
 from json.decoder import JSONDecodeError
-from typing import Dict, List, Literal, NamedTuple, TypedDict
+from typing import Dict, List, Literal, NamedTuple, TypedDict, Union
 
 import config
 import patterns
@@ -33,7 +33,7 @@ Kilometers_per_hour = Speed
 class OpenWeatherDict(TypedDict):
     """Response of the Open Weather API service."""
 
-    weather: List[Dict[Literal["id", "description"], int | str]]
+    weather: List[Dict[Literal["id", "description"], Union[int, str]]]
     main: Dict[Literal["temp"], float]
     wind: Dict[Literal["speed"], float]
     sys: Dict[Literal["sunrise", "sunset"], int]
