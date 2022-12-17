@@ -61,7 +61,7 @@ class ShellCommand:
             (stdout, stderr) = process.communicate(timeout=self.timeout)
             exit_code = process.wait(timeout=self.timeout)
         except TimeoutExpired as err:
-            process.kill
+            process.kill()
             raise CommandRunsTooLong(
                 f"Command '{err.cmd}' runs more than {err.timeout} seconds"
             )
