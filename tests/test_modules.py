@@ -54,9 +54,9 @@ class SetupWeather:
         city=CITY,
     )
     EXPECTED_DISPLAYING_WEATHER = (
-        f"{CITY.title()}, {TEMPERATURE}{config.TEMPERATURE_UNIT.value}, "
+        f"{CITY.title()}, {TEMPERATURE}{config.temperature_unit.value}, "
         f"{WEATHER_TYPE.value}\n\n{WEATHER_DESCRIPTION}\n"
-        f"Ветер: {WIND_SPEED}{config.SPEED_UNIT.value}\n"
+        f"Ветер: {WIND_SPEED}{config.speed_unit.value}\n"
         f"Восход: {SUNRISE.strftime('%H:%M')}\n"
         f"Закат: {SUNSET.strftime('%H:%M')}\n"
     )
@@ -263,8 +263,43 @@ class TestConfigs(SetupWeather):
         expected_temperature: str,
     ) -> None:
         """Test weather displaying in/with configured temperature unit."""
-        monkeypatch.setattr("config.TEMPERATURE_UNIT", temperature_unit)
+        monkeypatch.setattr("config.temperature_unit", temperature_unit)
         assert expected_temperature in format_weather(self.TEST_WEATHER)
+
+    @pytest.mark.parametrize(
+        "temperature_unit,expected_temperature",
+        [
+            ("aaa", "15°C"),
+            ("", "15°C"),
+            (None, "15°C"),
+            (True, "15°C"),
+            (0, "15°C"),
+            ("°C", "15°C"),
+            ("°K", "15°C"),
+            ("°F", "15°C"),
+        ],
+    )
+    def test_wrong_temperature_unit(
+        self,
+        monkeypatch: MonkeyPatch,
+        temperature_unit: TemperatureUnit,
+        expected_temperature: str,
+    ) -> None:
+        """
+        Check if unsupported temperature unit in config.
+
+        Should be warning and temperature unit set to default (°C).
+        """
+        wrong_temperature_warning_text = (
+            f"No such option for config.temperature_unit: '{temperature_unit}'. "
+            f"Available measurement units for temperature are "
+            f"{', '.join([str(unit) for unit in TemperatureUnit])}. "
+            f"Temperature shown in °C."
+        )
+        monkeypatch.setattr("config.temperature_unit", temperature_unit)
+        with pytest.warns(UserWarning, match=wrong_temperature_warning_text):
+            actual_weather = format_weather(self.TEST_WEATHER)
+        assert expected_temperature in actual_weather
 
     @pytest.mark.parametrize(
         "speed_unit,expected_speed",
@@ -281,8 +316,45 @@ class TestConfigs(SetupWeather):
         expected_speed: str,
     ) -> None:
         """Test weather displaying in/with configured speed unit."""
-        monkeypatch.setattr("config.SPEED_UNIT", speed_unit)
+        monkeypatch.setattr("config.speed_unit", speed_unit)
         assert expected_speed in format_weather(self.TEST_WEATHER)
+
+    @pytest.mark.parametrize(
+        "speed_unit,expected_speed",
+        [
+            ("aaa", "15°C"),
+            ("", "15°C"),
+            (None, "15°C"),
+            (True, "15°C"),
+            (0, "15°C"),
+            ("m/s", "15°C"),
+            ("м/с", "15°C"),
+            ("km/h", "15°C"),
+            ("км/ч", "15°C"),
+            ("mph", "15°C"),
+            ("миль/час", "15°C"),
+        ],
+    )
+    def test_wrong_speed_unit(
+        self,
+        monkeypatch: MonkeyPatch,
+        speed_unit: SpeedUnit,
+        expected_speed: str,
+    ) -> None:
+        """
+        Check if unsupported temperature unit in config.
+
+        Should be warning and temperature unit set to default (°C).
+        """
+        wrong_speed_warning_text = (
+            f"No such option for config.speed_unit: '{speed_unit}'. "
+            f"Available measurement units for speed are "
+            f"{', '.join([str(unit) for unit in SpeedUnit])}. Speed shown in m/s."
+        )
+        monkeypatch.setattr("config.speed_unit", speed_unit)
+        with pytest.warns(UserWarning, match=wrong_speed_warning_text):
+            actual_weather = format_weather(self.TEST_WEATHER)
+        assert expected_speed in actual_weather
 
     @pytest.mark.parametrize(
         "weather_displaying_pattern, expected_displaying_weather",

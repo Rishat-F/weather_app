@@ -33,7 +33,8 @@ class SpeedUnit(Enum):
 
 
 OPEN_WEATHER_API_KEY = os.getenv("OPEN_WEATHER_API_KEY", default=None)
-OPEN_WEATHER_API_LANG = OpenWeatherLanguage.RUSSIAN
-TEMPERATURE_UNIT = TemperatureUnit.CELSIUS
-SPEED_UNIT = SpeedUnit.METERS_PER_SECOND
 CURRENT_LOCATION_INFO_SERVICE_URL = "https://ipinfo.io/json"
+
+open_weather_api_lang = OpenWeatherLanguage.RUSSIAN
+temperature_unit = TemperatureUnit.CELSIUS
+speed_unit = SpeedUnit.METERS_PER_SECOND

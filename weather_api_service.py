@@ -87,7 +87,7 @@ def get_weather(coordinates: Coordinates) -> Weather:
                         latitude=coordinates.latitude,
                         longitude=coordinates.longitude,
                         api_key=config.OPEN_WEATHER_API_KEY,
-                        language=config.OPEN_WEATHER_API_LANG.value,
+                        language=config.open_weather_api_lang.value,
                     ),
                     CURL_SILENT_ARG,
                 ],
