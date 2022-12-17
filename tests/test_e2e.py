@@ -1,6 +1,7 @@
 """End to end tests."""
 
 import re
+import sys
 from subprocess import PIPE, Popen
 from typing import NamedTuple
 
@@ -18,7 +19,7 @@ class CommandExecutionResult(NamedTuple):
 class WeatherCommand:
     """Shell command for run application."""
 
-    PYTHON_EXECUTABLE = "python3.8"
+    PYTHON_EXECUTABLE = sys.executable
     ENTRY_POINT = ["weather.py"]
 
     def execute(self) -> CommandExecutionResult:
