@@ -22,11 +22,11 @@ weather_displaying_pattern = (
 measurement_unit_warning_pattern = (
     "No such option for {unit_variable_name}: '{unit_variable_value}'. "
     "Available measurement units for {measurement} are "
-    "{measurement_units_enum}. Temperature shown in {default_unit}."
+    "{available_measurement_units}. {titled_measurement} shown in {default_unit}."
 )
 
 
 language_warning_patter = (
     "No such option for {language_variable_name}: '{language_variable_value}'. "
-    "Available languages are {languages_enum}."
+    "Available languages are {available_languages}."
 )
