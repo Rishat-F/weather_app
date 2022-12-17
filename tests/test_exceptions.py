@@ -1,7 +1,7 @@
 """Tests for application exceptions."""
 
 from subprocess import Popen
-from typing import Any, Callable, Type
+from typing import Any, Callable, Tuple, Type
 
 import pytest
 from pytest import MonkeyPatch
@@ -99,10 +99,10 @@ def command_that_use_internet() -> Type[ShellCommand]:
 
 
 @pytest.fixture
-def monkeypatch_communicate_with_stderr() -> Callable[[Any, Any], tuple[Any, bytes]]:
+def monkeypatch_communicate_with_stderr() -> Callable[[Any, Any], Tuple[Any, bytes]]:
     """Mock for Popen.communicate method that returns stderr."""
 
-    def inner(*args: Any, **kwargs: Any) -> tuple[Any, bytes]:
+    def inner(*args: Any, **kwargs: Any) -> Tuple[Any, bytes]:
         _, _ = args, kwargs
         return (None, b"error")
 
@@ -111,11 +111,11 @@ def monkeypatch_communicate_with_stderr() -> Callable[[Any, Any], tuple[Any, byt
 
 @pytest.fixture
 def monkeypatch_communicate_with_undecodable_output() -> Callable[
-    [Any, Any], tuple[Undecodable_bytes, Any]
+    [Any, Any], Tuple[Undecodable_bytes, Any]
 ]:
     """Mock for Popen.communicate method."""
 
-    def inner(*args: Any, **kwargs: Any) -> tuple[Undecodable_bytes, Any]:
+    def inner(*args: Any, **kwargs: Any) -> Tuple[Undecodable_bytes, Any]:
         _, _ = args, kwargs
         undecodable_bytes = b"\x80\x02\x03"
         return (undecodable_bytes, None)
@@ -139,12 +139,12 @@ def monkeypatch_wait() -> Callable[[Exit_code], Callable[[Any, Any], Exit_code]]
 
 @pytest.fixture
 def monkeypatch_execute() -> Callable[
-    [str], Callable[[Any, Any], tuple[str, Any, Any]]
+    [str], Callable[[Any, Any], Tuple[str, Any, Any]]
 ]:
     """Mock for ShellCommand.execute method."""
 
-    def inner(command_output: str) -> Callable[[Any, Any], tuple[str, Any, Any]]:
-        def inner_in_inner(*args: Any, **kwargs: Any) -> tuple[str, Any, Any]:
+    def inner(command_output: str) -> Callable[[Any, Any], Tuple[str, Any, Any]]:
+        def inner_in_inner(*args: Any, **kwargs: Any) -> Tuple[str, Any, Any]:
             _, _ = args, kwargs
             return (command_output, None, None)
 
@@ -193,7 +193,7 @@ class TestCoordinatesModuleExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_communicate_with_stderr: Callable[
-            [], Callable[[Any, Any], tuple[Any, bytes]]
+            [], Callable[[Any, Any], Tuple[Any, bytes]]
         ],
     ) -> None:
         """If command for getting current GPS coordinates ends with err in stderr."""
@@ -219,7 +219,7 @@ class TestCoordinatesModuleExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_communicate_with_undecodable_output: Callable[
-            [Any, Any], tuple[Undecodable_bytes, Any]
+            [Any, Any], Tuple[Undecodable_bytes, Any]
         ],
     ) -> None:
         """If command stdout is undecodable."""
@@ -250,7 +250,7 @@ class TestCoordinatesModuleExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_execute: Callable[
-            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+            [str], Callable[[Any, Any], Tuple[str, Any, Any]]
         ],
     ) -> None:
         """If command stdout has no dictionary with latitude and longitude."""
@@ -278,7 +278,7 @@ class TestCoordinatesModuleExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_execute: Callable[
-            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+            [str], Callable[[Any, Any], Tuple[str, Any, Any]]
         ],
     ) -> None:
         """
@@ -348,7 +348,7 @@ class TestWeatherApiServiceExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_communicate_with_stderr: Callable[
-            [], Callable[[Any, Any], tuple[Any, bytes]]
+            [], Callable[[Any, Any], Tuple[Any, bytes]]
         ],
     ) -> None:
         """If command for getting weather by GPS coordinates ends with err in stderr."""
@@ -374,7 +374,7 @@ class TestWeatherApiServiceExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_communicate_with_undecodable_output: Callable[
-            [Any, Any], tuple[Undecodable_bytes, Any]
+            [Any, Any], Tuple[Undecodable_bytes, Any]
         ],
     ) -> None:
         """If command stdout is undecodable."""
@@ -401,7 +401,7 @@ class TestWeatherApiServiceExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_execute: Callable[
-            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+            [str], Callable[[Any, Any], Tuple[str, Any, Any]]
         ],
     ) -> None:
         """If command stdout has no dictionary inside."""
@@ -448,7 +448,7 @@ class TestWeatherApiServiceExceptions:
         monkeypatch: MonkeyPatch,
         usual_command: Callable[[], Type[ShellCommand]],
         monkeypatch_execute: Callable[
-            [str], Callable[[Any, Any], tuple[str, Any, Any]]
+            [str], Callable[[Any, Any], Tuple[str, Any, Any]]
         ],
     ) -> None:
         """If command stdout has dictionary without needed weather data."""
