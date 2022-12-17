@@ -286,7 +286,7 @@ class TestConfigs(SetupWeather):
         expected_temperature: str,
     ) -> None:
         """
-        Check if unsupported temperature unit in config.
+        Check if wrong temperature unit in config.
 
         Should be warning and temperature unit set to default (°C).
         """
@@ -322,17 +322,17 @@ class TestConfigs(SetupWeather):
     @pytest.mark.parametrize(
         "speed_unit,expected_speed",
         [
-            ("aaa", "15°C"),
-            ("", "15°C"),
-            (None, "15°C"),
-            (True, "15°C"),
-            (0, "15°C"),
-            ("m/s", "15°C"),
-            ("м/с", "15°C"),
-            ("km/h", "15°C"),
-            ("км/ч", "15°C"),
-            ("mph", "15°C"),
-            ("миль/час", "15°C"),
+            ("aaa", "2.5m/s"),
+            ("", "2.5m/s"),
+            (None, "2.5m/s"),
+            (True, "2.5m/s"),
+            (0, "2.5m/s"),
+            ("m/s", "2.5m/s"),
+            ("м/с", "2.5m/s"),
+            ("km/h", "2.5m/s"),
+            ("км/ч", "2.5m/s"),
+            ("mph", "2.5m/s"),
+            ("миль/час", "2.5m/s"),
         ],
     )
     def test_wrong_speed_unit(
@@ -342,9 +342,9 @@ class TestConfigs(SetupWeather):
         expected_speed: str,
     ) -> None:
         """
-        Check if unsupported temperature unit in config.
+        Check if wrong speed unit in config.
 
-        Should be warning and temperature unit set to default (°C).
+        Should be warning and speed unit set to default (m/s).
         """
         wrong_speed_warning_text = (
             f"No such option for config.speed_unit: '{speed_unit}'. "
