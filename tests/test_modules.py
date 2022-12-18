@@ -1,13 +1,11 @@
 """Tests for application modules."""
 
 import numbers
-import sys
 from datetime import datetime
-from io import StringIO
 from typing import Any
 
 import pytest
-from pytest import MonkeyPatch
+from pytest import CaptureFixture, MonkeyPatch
 
 import config
 from config import SpeedUnit, TemperatureUnit
@@ -147,7 +145,9 @@ class TestFormattingWeather(SetupWeather):
 class TestDisplayingWeather(SetupWeather):
     """Check that programm really display weather in terminal."""
 
-    def test_display_weather(self, monkeypatch: MonkeyPatch) -> None:
+    def test_display_weather(
+        self, capsys: CaptureFixture, monkeypatch: MonkeyPatch
+    ) -> None:
         """Check weather printing."""
 
         def mock_get_gps_coordinates() -> None:
@@ -158,15 +158,12 @@ class TestDisplayingWeather(SetupWeather):
             """Mock get_weather function."""
             return self.TEST_WEATHER
 
-        mock_io = StringIO()
-        monkeypatch.setattr("sys.stdout", mock_io)
         monkeypatch.setattr("weather.get_gps_coordinates", mock_get_gps_coordinates)
         monkeypatch.setattr("weather.get_weather", mock_get_weather)
         main()
-        assert (
-            sys.stdout.getvalue()
-            == self.EXPECTED_DISPLAYING_WEATHER + "\n"  # type: ignore
-        )
+        stdout, stderr = capsys.readouterr()
+        assert stdout == self.EXPECTED_DISPLAYING_WEATHER + "\n"
+        assert stderr == ""
 
 
 class TestConverters:
