@@ -17,6 +17,7 @@ pytest = "^7.1.2"
 vulture = "^2.4"
 pre-commit-hooks = "^4.3.0"
 coverage = {extras = ["toml"], version = "^6.5.0"}
+mutmut = "^2.4.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -40,3 +41,8 @@ omit = ["tests/*"]
 exclude_lines = [
     "if __name__ == .__main__.:",
 ]
+
+[tool.mutmut]
+paths_to_mutate="config.py,converters.py,coordinates.py,exceptions.py,shell_command.py,weather_api_service.py,weather_formatter.py,weather.py"
+runner="python -m pytest"
+tests_dir="tests/"
