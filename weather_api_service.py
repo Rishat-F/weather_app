@@ -1,5 +1,6 @@
 """Getting weather by GPS coordinates."""
 
+
 import json
 import re
 from datetime import datetime
@@ -7,9 +8,11 @@ from enum import Enum
 from json.decoder import JSONDecodeError
 from typing import Dict, List, Literal, NamedTuple, TypedDict, Union
 
-import config
 import patterns
-import shell_command
+from config import (
+    OPEN_WEATHER_API_KEY,
+    open_weather_api_lang,
+)
 from coordinates import Coordinates
 from exceptions import (
     ApiServiceError,
@@ -17,7 +20,12 @@ from exceptions import (
     CommandExecutionFailed,
     NoOpenWeatherApiKey,
 )
-from shell_command import CURL, CURL_NO_INTERNET_CONNECTION_EXIT_CODE, CURL_SILENT_ARG
+from shell_command import (
+    CURL,
+    CURL_NO_INTERNET_CONNECTION_EXIT_CODE,
+    CURL_SILENT_ARG,
+    ShellCommand,
+)
 
 Temperature = int
 Celsius = Temperature
@@ -74,20 +82,20 @@ class Weather(NamedTuple):
 
 def get_weather(coordinates: Coordinates) -> Weather:
     """Request weather in weather API service and return it."""
-    if not config.OPEN_WEATHER_API_KEY:
+    if not OPEN_WEATHER_API_KEY:
         raise NoOpenWeatherApiKey(
             "There is no OPEN_WEATHER_API_KEY in your environment."
         )
     else:
         weather = _get_weather_by_command(
-            shell_command.ShellCommand(
+            ShellCommand(
                 executable=CURL,
                 arguments=[
                     patterns.open_weather_api_url_pattern.format(
                         latitude=coordinates.latitude,
                         longitude=coordinates.longitude,
-                        api_key=config.OPEN_WEATHER_API_KEY,
-                        language=config.open_weather_api_lang.value,
+                        api_key=OPEN_WEATHER_API_KEY,
+                        language=open_weather_api_lang.value,
                     ),
                     CURL_SILENT_ARG,
                 ],
@@ -97,7 +105,7 @@ def get_weather(coordinates: Coordinates) -> Weather:
     return weather
 
 
-def _get_weather_by_command(command: shell_command.ShellCommand) -> Weather:
+def _get_weather_by_command(command: ShellCommand) -> Weather:
     """Return weather by shell command."""
     try:
         command_output, *_ = command.execute()

@@ -305,7 +305,7 @@ class TestWeatherApiServiceExceptions:
         not_existing_command: Callable[[], Type[ShellCommand]],
     ) -> None:
         """If there is no command in system for getting weather by GPS coordinates."""
-        monkeypatch.setattr(shell_command, "ShellCommand", not_existing_command)
+        monkeypatch.setattr("weather_api_service.ShellCommand", not_existing_command)
         with pytest.raises(NoSuchCommand):
             get_weather(self.coordinates)
 
@@ -316,14 +316,14 @@ class TestWeatherApiServiceExceptions:
         monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
     ) -> None:
         """If there is no internet connection."""
-        monkeypatch.setattr(shell_command, "ShellCommand", command_that_use_internet)
+        monkeypatch.setattr("weather_api_service.ShellCommand", command_that_use_internet)
         monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NO_INTERNET_EXIT_CODE))
         with pytest.raises(NoInternetConnection):
             get_weather(self.coordinates)
 
     def test_no_open_weather_api_key(self, monkeypatch: MonkeyPatch) -> None:
         """If there is no OPEN_WEATHER_API_KEY variable in your environment."""
-        monkeypatch.setattr(config, "OPEN_WEATHER_API_KEY", None)
+        monkeypatch.setattr("weather_api_service.OPEN_WEATHER_API_KEY", None)
         with pytest.raises(NoOpenWeatherApiKey):
             get_weather(self.coordinates)
 
@@ -333,13 +333,13 @@ class TestWeatherApiServiceExceptions:
         long_running_command: Callable[[], Type[ShellCommand]],
     ) -> None:
         """If command for getting weather by GPS coordinates runs too long."""
-        monkeypatch.setattr(shell_command, "ShellCommand", long_running_command)
+        monkeypatch.setattr("weather_api_service.ShellCommand", long_running_command)
         with pytest.raises(CommandRunsTooLong):
             get_weather(self.coordinates)
 
     def test_wrong_open_weather_api_key(self, monkeypatch: MonkeyPatch) -> None:
         """If there is wrong OPEN_WEATHER_API_KEY variable in your environment."""
-        monkeypatch.setattr(config, "OPEN_WEATHER_API_KEY", "qwerty")
+        monkeypatch.setattr("weather_api_service.OPEN_WEATHER_API_KEY", "qwerty")
         with pytest.raises(ApiServiceError):
             get_weather(self.coordinates)
 
@@ -352,7 +352,7 @@ class TestWeatherApiServiceExceptions:
         ],
     ) -> None:
         """If command for getting weather by GPS coordinates ends with err in stderr."""
-        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr("weather_api_service.ShellCommand", usual_command)
         monkeypatch.setattr(Popen, "communicate", monkeypatch_communicate_with_stderr)
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
@@ -364,7 +364,7 @@ class TestWeatherApiServiceExceptions:
         monkeypatch_wait: Callable[[Exit_code], Callable[[Any, Any], Exit_code]],
     ) -> None:
         """If command for getting weather by GPS coordinates returns code != 0."""
-        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr("weather_api_service.ShellCommand", usual_command)
         monkeypatch.setattr(Popen, "wait", monkeypatch_wait(NON_ZERO_EXIT_CODE))
         with pytest.raises(CantGetWeather):
             get_weather(self.coordinates)
@@ -378,7 +378,7 @@ class TestWeatherApiServiceExceptions:
         ],
     ) -> None:
         """If command stdout is undecodable."""
-        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr("weather_api_service.ShellCommand", usual_command)
         monkeypatch.setattr(
             Popen, "communicate", monkeypatch_communicate_with_undecodable_output
         )
@@ -405,7 +405,7 @@ class TestWeatherApiServiceExceptions:
         ],
     ) -> None:
         """If command stdout has no dictionary inside."""
-        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr("weather_api_service.ShellCommand", usual_command)
         monkeypatch.setattr(
             ShellCommand, "execute", monkeypatch_execute(command_output)
         )
@@ -452,7 +452,7 @@ class TestWeatherApiServiceExceptions:
         ],
     ) -> None:
         """If command stdout has dictionary without needed weather data."""
-        monkeypatch.setattr(shell_command, "ShellCommand", usual_command)
+        monkeypatch.setattr("weather_api_service.ShellCommand", usual_command)
         monkeypatch.setattr(
             ShellCommand, "execute", monkeypatch_execute(command_output)
         )
